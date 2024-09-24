@@ -20,6 +20,7 @@ const employees = [
 ];
 
 const HomeScreen = (props) => {
+  const today = new Date();
   const [generated, setGenerated] = useState(false);
   const onAddHandler = () => {
     props.navigation.navigate('AddEntry');
@@ -32,13 +33,22 @@ const HomeScreen = (props) => {
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
-        <View style={{ flex: 0.5 }}>
-          <Text>Welcome, Ruben</Text>
-          <Text>Today is 23.09.2024</Text>
+        <View style={styles.greetingContainer}>
+          <Text style={styles.greetingText}>Welcome, Ruben</Text>
+          <View style={styles.dateContainer}>
+            <Text style={styles.dateText}> Today is </Text>
+            <Text style={styles.dateValue}>
+              {today.getDate()}.
+              {today.getMonth() < 10
+                ? '0' + today.getMonth().toString()
+                : today.getMonth()}
+              .{today.getFullYear()}
+            </Text>
+          </View>
         </View>
         <View>
           <SafeAreaView style={styles.employeesList}>
-            <Text>You added entries for:</Text>
+            <Text style={styles.listTitle}>So far, you added entries for:</Text>
             <FlatList
               data={employees}
               renderItem={(itemData) => (
@@ -100,6 +110,37 @@ const styles = StyleSheet.create({
     flex: 0.6,
     justifyContent: 'space-evenly',
     alignItems: 'center',
+  },
+
+  greetingContainer: {
+    flex: 0.3,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  greetingText: {
+    fontSize: 26,
+    fontWeight: '600',
+  },
+
+  dateContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  dateText: {
+    fontSize: 20,
+  },
+
+  dateValue: {
+    fontSize: 20,
+    color: '#9E2A2B',
+    fontWeight: '600',
+  },
+
+  listTitle: {
+    textAlign: 'center',
   },
 
   employeesList: {

@@ -34,7 +34,7 @@ const myStyles = (props) =>
       justifyContent: 'center',
       alignItems: 'center',
       overflow: 'hidden',
-      borderRadius: 9,
+      borderRadius: 20,
     },
 
     title: {
