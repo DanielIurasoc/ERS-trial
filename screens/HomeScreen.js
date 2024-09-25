@@ -28,6 +28,10 @@ const HomeScreen = (props) => {
 
   const dispatch = useDispatch();
 
+  const allEmployeesList = useSelector(
+    (state) => state.appData.allEmployeesList
+  );
+
   const clockedEmployeesList = useSelector(
     (state) => state.appData.clockedEmployeesList
   );
@@ -37,6 +41,7 @@ const HomeScreen = (props) => {
   };
 
   const onAddUsersHandler = async () => {
+    console.log(clockedEmployeesList);
     // try {
     //   await writeToAsyncStorage('allEmployeesList', employees);
     //   dispatch(appDataActions.setAllEmployeesList(employees));
@@ -47,6 +52,7 @@ const HomeScreen = (props) => {
 
   const onGenerateHandler = () => {
     setGenerated((prev) => !prev);
+    // dispatch(appDataActions.clearClockedEmployeesList());
   };
 
   // write given data to Async Storage in key-value pairs
@@ -74,39 +80,44 @@ const HomeScreen = (props) => {
           <SafeAreaView style={styles.employeesList}>
             <Text style={styles.listTitle}>So far, you added entries for:</Text>
             <FlatList
-              data={employees}
+              data={clockedEmployeesList}
               renderItem={(itemData) => (
                 <CustomListItem
                   counter={itemData.index + 1}
-                  content={itemData.item.name}
+                  content={
+                    allEmployeesList.find((emp) => emp.id === itemData.item)
+                      .name
+                  }
                 />
               )}
-              keyExtractor={(item) => item.id}
+              keyExtractor={(item) => item}
             />
           </SafeAreaView>
         </View>
       </View>
       <View style={styles.actionsContainer}>
-        <DefaultButton
-          width={85}
-          height={60}
-          color="#9E2A2B"
-          pressedColor="#8C2122"
-          fontSize={40}
-          fontColor="#E09F3E"
-          title="+"
-          action={onAddHandler}
-        />
-        <DefaultButton
-          width={150}
-          height={60}
-          color="#9E2A2B"
-          pressedColor="#8C2122"
-          fontSize={28}
-          fontColor="#E09F3E"
-          title="Add users"
-          action={onAddUsersHandler}
-        />
+        <View style={styles.mainButtonsContainer}>
+          <DefaultButton
+            width={150}
+            height={60}
+            color="#9E2A2B"
+            pressedColor="#8C2122"
+            fontSize={28}
+            fontColor="#E09F3E"
+            title="Settings"
+            action={onAddUsersHandler}
+          />
+          <DefaultButton
+            width={85}
+            height={60}
+            color="#9E2A2B"
+            pressedColor="#8C2122"
+            fontSize={40}
+            fontColor="#E09F3E"
+            title="+"
+            action={onAddHandler}
+          />
+        </View>
         <View style={styles.generateContainer}>
           <DefaultButton
             width={205}
@@ -183,6 +194,16 @@ const styles = StyleSheet.create({
 
   actionsContainer: {
     flex: 0.3,
+    justifyContent: 'space-evenly',
+    alignItems: 'center',
+  },
+
+  mainButtonsContainer: {
+    flex: 0.5,
+    // paddingHorizontal: 50,
+    paddingRight: 30,
+    width: '100%',
+    flexDirection: 'row',
     justifyContent: 'space-evenly',
     alignItems: 'center',
   },

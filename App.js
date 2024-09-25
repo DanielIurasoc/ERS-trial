@@ -41,7 +41,6 @@ export default function App() {
         console.warn(e);
       } finally {
         // fonts were loaded, move on
-        console.log('pass');
         setFontsLoaded(true);
         setIsLoading(false);
       }
@@ -56,7 +55,6 @@ export default function App() {
     try {
       const value = await AsyncStorage.getItem(key);
       if (value !== null) {
-        console.log(value);
         switch (key) {
           case 'today':
             dispatch(appDataActions.setDate(value));
@@ -77,7 +75,6 @@ export default function App() {
   useEffect(() => {
     const hideSplashScreen = async () => {
       if (fontsLoaded) {
-        console.log('sad');
         await SplashScreen.hideAsync();
       }
     };

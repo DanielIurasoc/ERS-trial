@@ -4,10 +4,11 @@ import DatePicker from 'react-native-date-picker';
 import { SelectList } from 'react-native-dropdown-select-list';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import * as appDataActions from '../store/actions.js';
 import DefaultButton from '../components/CustomButton.js';
 import CustomInputField from '../components/CustomInputField.js';
 import CustomTextInputField from '../components/CustomTextInputField.js';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 const AddScreen = (props) => {
   // FORM DATA
@@ -45,6 +46,8 @@ const AddScreen = (props) => {
     (state) => state.appData.allEmployeesList
   );
 
+  const dispatch = useDispatch();
+
   // method to update a specific field in the form state
   const updateDataField = (identifier, value) => {
     setFormState((prevFormState) => ({
@@ -80,6 +83,7 @@ const AddScreen = (props) => {
 
   const onConfirmHandler = () => {
     props.navigation.goBack();
+    dispatch(appDataActions.addClockedEmployee(employeeId));
     // console.log(allEmployeesList);
   };
 
