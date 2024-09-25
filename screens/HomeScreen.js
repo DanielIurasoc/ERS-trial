@@ -1,6 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, FlatList, SafeAreaView } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useDispatch, useSelector } from 'react-redux';
 
+import * as appDataActions from '../store/actions.js';
 import DefaultButton from '../components/CustomButton.js';
 import CustomListItem from '../components/CustomListItem.js';
 
@@ -20,14 +23,35 @@ const employees = [
 ];
 
 const HomeScreen = (props) => {
-  const today = new Date();
   const [generated, setGenerated] = useState(false);
+  const today = useSelector((state) => state.appData.today);
+
+  const dispatch = useDispatch();
+
+  const clockedEmployeesList = useSelector(
+    (state) => state.appData.clockedEmployeesList
+  );
+
   const onAddHandler = () => {
     props.navigation.navigate('AddEntry');
   };
 
+  const onAddUsersHandler = async () => {
+    // try {
+    //   await writeToAsyncStorage('allEmployeesList', employees);
+    //   dispatch(appDataActions.setAllEmployeesList(employees));
+    // } catch (error) {
+    //   console.error(error);
+    // }
+  };
+
   const onGenerateHandler = () => {
     setGenerated((prev) => !prev);
+  };
+
+  // write given data to Async Storage in key-value pairs
+  const writeToAsyncStorage = async (key, value) => {
+    await AsyncStorage.setItem(key, JSON.stringify(value));
   };
 
   return (
@@ -72,6 +96,16 @@ const HomeScreen = (props) => {
           fontColor="#E09F3E"
           title="+"
           action={onAddHandler}
+        />
+        <DefaultButton
+          width={150}
+          height={60}
+          color="#9E2A2B"
+          pressedColor="#8C2122"
+          fontSize={28}
+          fontColor="#E09F3E"
+          title="Add users"
+          action={onAddUsersHandler}
         />
         <View style={styles.generateContainer}>
           <DefaultButton

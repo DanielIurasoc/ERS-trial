@@ -1,31 +1,18 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import DatePicker from 'react-native-date-picker';
 import { SelectList } from 'react-native-dropdown-select-list';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import DefaultButton from '../components/CustomButton.js';
 import CustomInputField from '../components/CustomInputField.js';
 import CustomTextInputField from '../components/CustomTextInputField.js';
-
-const employees = [
-  {
-    id: 'eid001',
-    name: 'John Cena',
-  },
-  {
-    id: 'eid002',
-    name: 'Matthew McConnaghay',
-  },
-  {
-    id: 'eid003',
-    name: 'Sir Alex Ferguson',
-  },
-];
+import { useSelector } from 'react-redux';
 
 const AddScreen = (props) => {
-  const [selected, setSelected] = useState('');
   // FORM DATA
   const [formState, setFormState] = useState({
+    employeeId: '',
     date: ' - ', //useSelector((state) => state.appData.date),
     dateOpen: false,
     startTime: ' - ', //useSelector((state) => state.appData.startTime),
@@ -40,6 +27,7 @@ const AddScreen = (props) => {
   });
 
   const {
+    employeeId,
     date,
     dateOpen,
     startTime,
@@ -52,6 +40,10 @@ const AddScreen = (props) => {
     changed,
     isValid,
   } = formState;
+
+  const allEmployeesList = useSelector(
+    (state) => state.appData.allEmployeesList
+  );
 
   // method to update a specific field in the form state
   const updateDataField = (identifier, value) => {
@@ -87,27 +79,49 @@ const AddScreen = (props) => {
   };
 
   const onConfirmHandler = () => {
-    console.log(formState);
     props.navigation.goBack();
+    // console.log(allEmployeesList);
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}> Manual entry for </Text>
+      <Text style={styles.title}> Manual entry for: </Text>
 
       {/* EMPLOYEE PICKER */}
       <SelectList
-        setSelected={setSelected}
-        data={employees}
-        save="name"
-        // fontFamily="poppins-regular"
+        // onSelect={() => console.log(employeeId)}
+        setSelected={(selected) => {
+          updateDataField('employeeId', selected);
+        }}
+        data={allEmployeesList.map((employee) => ({
+          key: employee.id,
+          value: employee.name,
+        }))}
+        save="key"
         boxStyles={{
-          width: 150,
+          width: '80%',
+          height: 58,
           lineHeight: 40,
+          borderWidth: 3,
+          borderRadius: 20,
+          paddingVertical: 15,
+          paddingLeft: 15,
+          marginVertical: 10,
           borderColor: '#9E2A2B',
         }}
-        inputStyles={{ fontSize: 14 }}
-        defaultOption={{ key: '1', value: 'John Cena' }}
+        inputStyles={{ fontSize: 18, fontWeight: '700', color: '#000' }}
+        placeholder="Select the employee"
+        dropdownStyles={{
+          zIndex: 999,
+          position: 'absolute',
+          top: 50,
+          width: '80%',
+          lineHeight: 40,
+          backgroundColor: '#fff',
+          borderRadius: 20,
+          borderColor: '#9E2A2B',
+        }}
+        dropdownTextStyles={{ fontSize: 16, color: '#000' }}
       />
 
       {/* DATE PICKER */}
@@ -232,7 +246,6 @@ const AddScreen = (props) => {
         action={(text) => handleInputChange('advancePayment', text)}
         keyboardType="numeric"
       />
-
       <DefaultButton
         width={120}
         height={45}
@@ -250,6 +263,7 @@ const AddScreen = (props) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingBottom: 40,
     justifyContent: 'center',
     alignItems: 'center',
   },
