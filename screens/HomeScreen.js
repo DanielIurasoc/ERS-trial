@@ -1,5 +1,13 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, FlatList, SafeAreaView } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  FlatList,
+  SafeAreaView,
+  Image,
+  Dimensions,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -41,7 +49,7 @@ const HomeScreen = (props) => {
   };
 
   const onAddUsersHandler = async () => {
-    console.log(clockedEmployeesList);
+    // console.log(clockedEmployeesList);
     // try {
     //   await writeToAsyncStorage('allEmployeesList', employees);
     //   dispatch(appDataActions.setAllEmployeesList(employees));
@@ -64,6 +72,12 @@ const HomeScreen = (props) => {
     <View style={styles.container}>
       <View style={styles.headerContainer}>
         <View style={styles.greetingContainer}>
+          <View style={styles.logoContainer}>
+            <Image
+              source={require('../assets/Logo_ERS.png')}
+              style={styles.logoImage}
+            />
+          </View>
           <Text style={styles.greetingText}>Welcome, Ruben</Text>
           <View style={styles.dateContainer}>
             <Text style={styles.dateText}> Today is </Text>
@@ -161,6 +175,18 @@ const styles = StyleSheet.create({
     flex: 0.3,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+
+  logoContainer: {
+    paddingVertical: '5%',
+  },
+
+  logoImage: {
+    width: Dimensions.get('window').width * 0.8,
+    height: Dimensions.get('window').height * 0.2,
+    maxHeight: 150,
+    resizeMode: 'stretch',
+    paddingVertical: '0%',
   },
 
   greetingText: {
