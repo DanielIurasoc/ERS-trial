@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -12,55 +12,33 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch, useSelector } from 'react-redux';
 
 import * as appDataActions from '../store/actions.js';
-import DefaultButton from '../components/CustomButton.js';
+import CustomButton from '../components/CustomButton.js';
 import CustomListItem from '../components/CustomListItem.js';
-
-const employees = [
-  {
-    id: 'eid001',
-    name: 'John Cena',
-  },
-  {
-    id: 'eid002',
-    name: 'Matthew McConnaghay',
-  },
-  {
-    id: 'eid003',
-    name: 'Sir Alex Ferguson',
-  },
-];
 
 const HomeScreen = (props) => {
   const [generated, setGenerated] = useState(false);
+
   const today = useSelector((state) => state.appData.today);
-
-  const dispatch = useDispatch();
-
   const allEmployeesList = useSelector(
     (state) => state.appData.allEmployeesList
   );
-
   const clockedEmployeesList = useSelector(
     (state) => state.appData.clockedEmployeesList
   );
+
+  const dispatch = useDispatch();
 
   const onAddHandler = () => {
     props.navigation.navigate('AddEntry');
   };
 
-  const onAddUsersHandler = async () => {
-    // console.log(clockedEmployeesList);
-    // try {
-    //   await writeToAsyncStorage('allEmployeesList', employees);
-    //   dispatch(appDataActions.setAllEmployeesList(employees));
-    // } catch (error) {
-    //   console.error(error);
-    // }
+  const onSettingsHandler = () => {
+    props.navigation.navigate('Settings');
   };
 
   const onGenerateHandler = () => {
     setGenerated((prev) => !prev);
-    // dispatch(appDataActions.clearClockedEmployeesList());
+    dispatch(appDataActions.clearClockedEmployeesList());
   };
 
   // write given data to Async Storage in key-value pairs
@@ -71,18 +49,21 @@ const HomeScreen = (props) => {
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
+        <View style={styles.logoContainer}>
+          <Image
+            source={require('../assets/Logo_ERS.png')}
+            style={styles.logoImage}
+          />
+        </View>
         <View style={styles.greetingContainer}>
-          <View style={styles.logoContainer}>
-            <Image
-              source={require('../assets/Logo_ERS.png')}
-              style={styles.logoImage}
-            />
-          </View>
           <Text style={styles.greetingText}>Welcome, Ruben</Text>
           <View style={styles.dateContainer}>
             <Text style={styles.dateText}> Today is </Text>
             <Text style={styles.dateValue}>
-              {today.getDate()}.
+              {today.getDate() < 10
+                ? '0' + today.getDate().toString()
+                : today.getDate()}
+              .
               {today.getMonth() < 10
                 ? '0' + today.getMonth().toString()
                 : today.getMonth()}
@@ -111,7 +92,7 @@ const HomeScreen = (props) => {
       </View>
       <View style={styles.actionsContainer}>
         <View style={styles.mainButtonsContainer}>
-          <DefaultButton
+          <CustomButton
             width={150}
             height={60}
             color="#9E2A2B"
@@ -119,9 +100,9 @@ const HomeScreen = (props) => {
             fontSize={28}
             fontColor="#E09F3E"
             title="Settings"
-            action={onAddUsersHandler}
+            action={onSettingsHandler}
           />
-          <DefaultButton
+          <CustomButton
             width={85}
             height={60}
             color="#9E2A2B"
@@ -133,7 +114,7 @@ const HomeScreen = (props) => {
           />
         </View>
         <View style={styles.generateContainer}>
-          <DefaultButton
+          <CustomButton
             width={205}
             height={60}
             color="#335C67"
@@ -171,14 +152,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  greetingContainer: {
-    flex: 0.3,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
   logoContainer: {
-    paddingVertical: '5%',
+    flex: 4,
+    // paddingVertical: '5%',
   },
 
   logoImage: {
@@ -187,6 +163,12 @@ const styles = StyleSheet.create({
     maxHeight: 150,
     resizeMode: 'stretch',
     paddingVertical: '0%',
+  },
+
+  greetingContainer: {
+    flex: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
   greetingText: {

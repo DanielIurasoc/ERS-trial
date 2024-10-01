@@ -1,15 +1,15 @@
 import './gesture-handler';
-import React, { useState, useCallback, useEffect } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { ActivityIndicator, Text, View } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
 import * as Font from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import { useDispatch, useSelector } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 SplashScreen.preventAutoHideAsync();
 
-import AppNavigator from './utils/navigation.js';
 import * as appDataActions from './store/actions.js';
+import AppNavigator from './utils/navigation.js';
 import CustomFonts from './utils/fonts.js';
 
 export default function App() {
@@ -33,6 +33,7 @@ export default function App() {
         await readFromAsyncStorage('clockedEmployeesList');
 
         await Font.loadAsync(CustomFonts);
+        // await Font.loadAsync({...CustomFonts});
 
         // artificial delay for style points
         await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -81,14 +82,6 @@ export default function App() {
     hideSplashScreen();
   }, [fontsLoaded]);
 
-  // Show/Hide the loading screen
-  // const onLayoutRootView = useCallback(async () => {
-  //   if (fontsLoaded) {
-  //     console.log('entered layoutrootview');
-  //     await SplashScreen.hideAsync();
-  //   }
-  // }, [fontsLoaded]);
-
   if (!fontsLoaded || isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -105,7 +98,6 @@ export default function App() {
 
   return (
     <View style={{ flex: 1 }}>
-      {/* // onLayout={onLayoutRootView}> */}
       <AppNavigator />
     </View>
   );

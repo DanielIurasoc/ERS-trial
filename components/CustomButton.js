@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 
-const DefaultButton = (props) => {
+const CustomButton = (props) => {
   const styles = myStyles(props);
   return (
     <View style={styles.container}>
@@ -43,4 +43,4 @@ const myStyles = (props) =>
     },
   });
 
-export default DefaultButton;
+export default CustomButton;

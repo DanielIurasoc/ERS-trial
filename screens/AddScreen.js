@@ -1,14 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
 import DatePicker from 'react-native-date-picker';
 import { SelectList } from 'react-native-dropdown-select-list';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import * as appDataActions from '../store/actions.js';
-import DefaultButton from '../components/CustomButton.js';
+import CustomButton from '../components/CustomButton.js';
 import CustomInputField from '../components/CustomInputField.js';
 import CustomTextInputField from '../components/CustomTextInputField.js';
-import { useDispatch, useSelector } from 'react-redux';
 
 const AddScreen = (props) => {
   // FORM DATA
@@ -73,7 +72,7 @@ const AddScreen = (props) => {
       [field]: text,
     }));
 
-    if (!formState.changed) {
+    if (!changed) {
       setFormState((prevUserData) => ({
         ...prevUserData,
         changed: true,
@@ -118,7 +117,7 @@ const AddScreen = (props) => {
         dropdownStyles={{
           zIndex: 999,
           position: 'absolute',
-          top: 50,
+          top: 60,
           width: '80%',
           lineHeight: 40,
           backgroundColor: '#fff',
@@ -250,7 +249,7 @@ const AddScreen = (props) => {
         action={(text) => handleInputChange('advancePayment', text)}
         keyboardType="numeric"
       />
-      <DefaultButton
+      <CustomButton
         width={120}
         height={45}
         color="#335C67"

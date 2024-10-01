@@ -2,7 +2,6 @@ import {
   SET_DATE,
   SET_ALL_EMPLOYEES_LIST,
   SET_CLOCKED_EMPLOYEES_LIST,
-  ADD_CLOCKED_EMPLOYEE,
   CLEAR_CLOCKED_EMPLOYEES_LIST,
 } from './actions.js';
 
@@ -24,14 +23,6 @@ export default (state = initialState, action) => {
         ...state,
         allEmployeesList: action.payload,
       };
-    case ADD_CLOCKED_EMPLOYEE:
-      if (!state.clockedEmployeesList.includes(action.payload)) {
-        return {
-          ...state,
-          clockedEmployeesList: [...state.clockedEmployeesList, action.payload],
-        };
-      }
-      return state;
     case SET_CLOCKED_EMPLOYEES_LIST:
       return {
         ...state,

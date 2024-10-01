@@ -4,6 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 
 import HomeScreen from '../screens/HomeScreen.js';
 import AddScreen from '../screens/AddScreen.js';
+import SettingsScreen from '../screens/SettingsScreen.js';
 
 const myStack = createStackNavigator();
 
@@ -29,6 +30,14 @@ function StackNavigator() {
         options={{
           headerShown: true,
           title: 'Add Entry',
+        }}
+      />
+      <myStack.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{
+          headerShown: true,
+          title: 'Settings',
         }}
       />
     </myStack.Navigator>
