@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -8,8 +8,11 @@ import {
   Image,
   Dimensions,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch, useSelector } from 'react-redux';
+import XLSX from 'xlsx';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import * as appDataActions from '../store/actions.js';
 import CustomButton from '../components/CustomButton.js';
@@ -36,14 +39,58 @@ const HomeScreen = (props) => {
     props.navigation.navigate('Settings');
   };
 
-  const onGenerateHandler = () => {
-    setGenerated((prev) => !prev);
-    dispatch(appDataActions.clearClockedEmployeesList());
+  const exportToExcelFile = async () => {
+    try {
+      // read data from Async Storage
+      const clockings = await AsyncStorage.getItem('clockings');
+      const clockingsArray = clockings ? JSON.parse(clockings) : [];
+
+      if (clockingsArray.length === 0) {
+        console.log('No data to export...');
+        return;
+      }
+
+      // create a new workbook and worksheet
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.json_to_sheet(clockingsArray);
+
+      // append the worksheet to the workbook
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Clockings');
+
+      // write the excel file as a binary string
+      const base64 = XLSX.write(workbook, { type: 'base64' });
+
+      // create a name for the file
+      const fileName = FileSystem.documentDirectory + 'clockings_report.xlsx';
+
+      // save it
+      await FileSystem.writeAsStringAsync(fileName, base64, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      // Share the file
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(fileName);
+
+        // show a message
+        setGenerated((prev) => !prev);
+      } else {
+        console.log('Sharing is not available on this device');
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
-  // write given data to Async Storage in key-value pairs
-  const writeToAsyncStorage = async (key, value) => {
-    await AsyncStorage.setItem(key, JSON.stringify(value));
+  const onGenerateHandler = () => {
+    // call the function to export
+    exportToExcelFile();
+
+    // clear the clocked employees list
+    dispatch(appDataActions.clearClockedEmployeesList());
+
+    // clear the clocked entries from Async Storage
+    // dispatch(appDataActions.clearClockingsFromAsyncStorage());
   };
 
   return (
@@ -64,9 +111,9 @@ const HomeScreen = (props) => {
                 ? '0' + today.getDate().toString()
                 : today.getDate()}
               .
-              {today.getMonth() < 10
-                ? '0' + today.getMonth().toString()
-                : today.getMonth()}
+              {today.getMonth() < 9
+                ? '0' + today.getMonth().toString() + 1
+                : today.getMonth() + 1}
               .{today.getFullYear()}
             </Text>
           </View>

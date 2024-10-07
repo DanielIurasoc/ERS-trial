@@ -6,7 +6,7 @@ import {
 } from './actions.js';
 
 const initialState = {
-  today: null,
+  today: new Date(),
   allEmployeesList: [],
   clockedEmployeesList: [],
 };

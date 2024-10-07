@@ -23,18 +23,22 @@ export const addEmployee = (employeeName) => {
       if (
         !allEmployeesList.some((employee) => employee.name === employeeName)
       ) {
-        // find the index of the last element and increase by 1
         let newIndex;
-        const index =
-          parseInt(
-            allEmployeesList[allEmployeesList.length - 1].id.substring(3)
-          ) + 1;
+        if (allEmployeesList.length !== 0) {
+          // find the index of the last element and increase by 1
+          const index =
+            parseInt(
+              allEmployeesList[allEmployeesList.length - 1].id.substring(3)
+            ) + 1;
 
-        // pad the lenght if needed (index is not at least 3 digits long)
-        if (index < 100) {
-          newIndex = 'eid' + index.toString().padStart(3, '0');
+          // pad the lenght if needed (index is not at least 3 digits long)
+          if (index < 100) {
+            newIndex = 'eid' + index.toString().padStart(3, '0');
+          } else {
+            newIndex = 'eid' + index.toString();
+          }
         } else {
-          newIndex = 'eid' + index.toString();
+          newIndex = 'eid001';
         }
 
         // create the new employee object with the id + name pair
@@ -97,17 +101,18 @@ export const setAllEmployeesList = (list) => {
   };
 };
 
-export const addClockedEmployee = (employeeId) => {
+export const addClockedEmployee = (clocking) => {
   // async needed for saving data, dispatch and getState are used for redux
   return async (dispatch, getState) => {
     // get current data from state.allEmployeesList
     const clockedEmployeesList = getState().appData.clockedEmployeesList;
 
     try {
+      await addClockingEntryToAsyncStorage(clocking);
       // check if the wanted employee is not already existing in the database
-      if (!clockedEmployeesList.some((eid) => eid === employeeId)) {
+      if (!clockedEmployeesList.some((eid) => eid === clocking.employeeId)) {
         // append the new object to the list
-        const updatedList = [...clockedEmployeesList, employeeId];
+        const updatedList = [...clockedEmployeesList, clocking.employeeId];
 
         // call writeToAsyncStorage
         await writeToAsyncStorage('clockedEmployeesList', updatedList);
@@ -135,6 +140,31 @@ export const clearClockedEmployeesList = () => {
   return {
     type: CLEAR_CLOCKED_EMPLOYEES_LIST,
   };
+};
+
+export const clearClockingsFromAsyncStorage = async () => {
+  try {
+    await writeToAsyncStorage('clockings', []);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const addClockingEntryToAsyncStorage = async (clocking) => {
+  try {
+    // read existing data
+    const value = await AsyncStorage.getItem('clockings');
+
+    // if data exists, parse it, otherwise init with empty array
+    const parsedArray = value ? JSON.parse(value) : [];
+
+    // concat the new clocking at the end
+    const updatedList = [...parsedArray, clocking];
+
+    AsyncStorage.setItem('clockings', JSON.stringify(updatedList));
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 const writeToAsyncStorage = async (identifier, array) => {

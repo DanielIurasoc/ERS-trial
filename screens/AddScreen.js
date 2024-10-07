@@ -10,10 +10,11 @@ import CustomInputField from '../components/CustomInputField.js';
 import CustomTextInputField from '../components/CustomTextInputField.js';
 
 const AddScreen = (props) => {
+  const [message, setMessage] = useState('');
   // FORM DATA
   const [formState, setFormState] = useState({
     employeeId: '',
-    date: ' - ', //useSelector((state) => state.appData.date),
+    date: new Date(), //useSelector((state) => state.appData.date),
     dateOpen: false,
     startTime: ' - ', //useSelector((state) => state.appData.startTime),
     startOpen: false,
@@ -23,7 +24,6 @@ const AddScreen = (props) => {
     description: '',
     advancePayment: 0,
     changed: false,
-    isValid: false,
   });
 
   const {
@@ -38,7 +38,6 @@ const AddScreen = (props) => {
     description,
     advancePayment,
     changed,
-    isValid,
   } = formState;
 
   const allEmployeesList = useSelector(
@@ -61,8 +60,6 @@ const AddScreen = (props) => {
     updateDataField('date', ' - ');
     updateDataField('startTime', ' - ');
     updateDataField('endTime', ' - ');
-    updateDataField('pauseTime', ' 00 : 00 ');
-    updateDataField('isValid', false);
   };
 
   // TEXT INPUT HANDLER FOR PERSONAL DATA
@@ -80,10 +77,59 @@ const AddScreen = (props) => {
     }
   };
 
+  // 0 -> valid, > 0 -> invalid
+  const checkFormValidity = () => {
+    if (employeeId === '') {
+      setMessage('Please choose an employee!');
+      return 1;
+    }
+    // if (date === ' - ') {
+    //   setMessage('Please pick a date!');
+    //   return 2;
+    // }
+    if (startTime === ' - ') {
+      setMessage('Please pick a starting time!');
+      return 3;
+    }
+    if (endTime === ' - ') {
+      setMessage('Please pick an ending time!');
+      return 4;
+    }
+    if (location === '') {
+      setMessage('Please enter a location');
+      return 5;
+    }
+    // if (description === '') {
+    //   setMessage('Please enter a description!');
+    //   return 6;
+    // }
+    // if (advancePayment === 0) {
+    //   setMessage('Please enter an advanced payment sum!');
+    //   return 7;
+    // }
+    return 0;
+  };
+
   const onConfirmHandler = () => {
-    props.navigation.goBack();
-    dispatch(appDataActions.addClockedEmployee(employeeId));
-    // console.log(allEmployeesList);
+    const returnedValue = checkFormValidity();
+
+    if (returnedValue === 0) {
+      // form is valid
+      const clocking = {
+        employeeId,
+        date,
+        startTime,
+        endTime,
+        location,
+        description,
+        advancePayment,
+      };
+
+      dispatch(appDataActions.addClockedEmployee(clocking));
+      props.navigation.goBack();
+    } else {
+      // form is not valid
+    }
   };
 
   return (
@@ -130,7 +176,11 @@ const AddScreen = (props) => {
       {/* DATE PICKER */}
       <CustomInputField
         label="Date"
-        value={date !== ' - ' ? date.toLocaleDateString('ro-RO') : date}
+        value={
+          date !== ' - '
+            ? date.toLocaleDateString('ro-RO')
+            : new Date().toLocaleDateString('ro-RO')
+        }
         iconName="calendar-clock-outline"
         action={() => {
           updateDataField('dateOpen', true);
@@ -145,7 +195,6 @@ const AddScreen = (props) => {
         onConfirm={(date) => {
           updateDataField('dateOpen', false);
           updateDataField('date', date);
-          // dispatch(appDataActions.setClockingData('date', date));
         }}
         onCancel={() => {
           updateDataField('dateOpen', false);
@@ -178,9 +227,9 @@ const AddScreen = (props) => {
         open={startOpen}
         date={startTime === ' - ' ? new Date() : startTime}
         onConfirm={(date) => {
+          date.setMinutes(Math.floor(date.getMinutes() / 5) * 5);
           updateDataField('startOpen', false);
           updateDataField('startTime', date);
-          //   dispatch(appDataActions.setClockingData('startTime', date));
         }}
         onCancel={() => {
           updateDataField('startOpen', false);
@@ -213,9 +262,9 @@ const AddScreen = (props) => {
         open={endOpen}
         date={endTime === ' - ' ? new Date() : endTime}
         onConfirm={(date) => {
+          date.setMinutes(Math.floor(date.getMinutes() / 5) * 5);
           updateDataField('endOpen', false);
           updateDataField('endTime', date);
-          //   dispatch(appDataActions.setClockingData('endTime', date));
         }}
         onCancel={() => {
           updateDataField('endOpen', false);
@@ -235,7 +284,7 @@ const AddScreen = (props) => {
       <CustomTextInputField
         label="Description"
         value={description}
-        placeholder="enter here"
+        placeholder="enter if you want to"
         iconName="comment-text-outline"
         action={(text) => handleInputChange('description', text)}
       />
@@ -244,21 +293,24 @@ const AddScreen = (props) => {
       <CustomTextInputField
         label="Advance payment"
         value={advancePayment}
-        placeholder="enter here"
+        placeholder="leave empty for 0"
         iconName="cash-multiple"
         action={(text) => handleInputChange('advancePayment', text)}
         keyboardType="numeric"
       />
-      <CustomButton
-        width={120}
-        height={45}
-        color="#335C67"
-        pressedColor="#214751"
-        fontSize={18}
-        fontColor="#E09F3E"
-        title="Add Entry"
-        action={onConfirmHandler}
-      />
+      <View>
+        <CustomButton
+          width={120}
+          height={45}
+          color="#335C67"
+          pressedColor="#214751"
+          fontSize={18}
+          fontColor="#E09F3E"
+          title="Add Entry"
+          action={onConfirmHandler}
+        />
+        {message !== '' && <Text> {message}</Text>}
+      </View>
     </View>
   );
 };

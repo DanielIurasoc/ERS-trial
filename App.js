@@ -24,16 +24,14 @@ export default function App() {
     // define the function
     async function prepare() {
       try {
-        const now = new Date();
-        if (today === null || today.getDate() !== now.getDate()) {
-          dispatch(appDataActions.setDate(now));
-        }
+        //read data from Async for day and clockings
         await readFromAsyncStorage('today');
-        await readFromAsyncStorage('allEmployeesList');
         await readFromAsyncStorage('clockedEmployeesList');
 
+        // read full list of employees
+        await readFromAsyncStorage('allEmployeesList');
+
         await Font.loadAsync(CustomFonts);
-        // await Font.loadAsync({...CustomFonts});
 
         // artificial delay for style points
         await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -51,6 +49,33 @@ export default function App() {
     prepare();
   }, []);
 
+  useEffect(() => {
+    async function prepare() {
+      // DAY RESET LOGIC
+
+      // get current date
+      const currentDate = new Date();
+
+      // console.log('current: ', currentDate);
+      // console.log('today: ', today);
+      // check if the day has changed
+      if (today.getDate() !== currentDate.getDate()) {
+        console.log('entered');
+        // reset today and clocked employees list in redux store
+        dispatch(appDataActions.setDate(currentDate));
+        dispatch(appDataActions.clearClockedEmployeesList);
+
+        // reset today and clocked employees list in async storage
+        writeToAsyncStorage('today', currentDate);
+        writeToAsyncStorage('clockedEmployeesList', []);
+      }
+    }
+
+    if (today instanceof Date && !isNaN(today)) {
+      prepare();
+    }
+  }, [today]);
+
   // read data from Async Storage
   const readFromAsyncStorage = async (key) => {
     try {
@@ -58,7 +83,8 @@ export default function App() {
       if (value !== null) {
         switch (key) {
           case 'today':
-            dispatch(appDataActions.setDate(value));
+            const parsedValue = JSON.parse(value);
+            dispatch(appDataActions.setDate(new Date(parsedValue)));
             break;
           case 'allEmployeesList':
             dispatch(appDataActions.setAllEmployeesList(JSON.parse(value)));
@@ -70,6 +96,15 @@ export default function App() {
       }
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  // write data to async storage
+  const writeToAsyncStorage = async (identifier, array) => {
+    try {
+      AsyncStorage.setItem(identifier, JSON.stringify(array));
+    } catch (e) {
+      console.log(e.message);
     }
   };
 
