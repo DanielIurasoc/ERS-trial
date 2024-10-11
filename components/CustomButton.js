@@ -23,6 +23,7 @@ const CustomButton = (props) => {
 const myStyles = (props) =>
   StyleSheet.create({
     container: {
+      zIndex: 1,
       //justifyContent: 'center',
       //alignItems: 'center',
       //borderRadius: 9,

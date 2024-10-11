@@ -5,6 +5,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import HomeScreen from '../screens/HomeScreen.js';
 import AddScreen from '../screens/AddScreen.js';
 import SettingsScreen from '../screens/SettingsScreen.js';
+import Colors from './colors.js';
 
 const myStack = createStackNavigator();
 
@@ -14,6 +15,13 @@ function StackNavigator() {
       initialRouteName="Home"
       screenOptions={{
         headerShown: false,
+        headerStyle: {
+          backgroundColor: Colors.primary4,
+        },
+        headerTintColor: Colors.light1,
+        headerTitleStyle: {
+          color: Colors.light1,
+        },
       }}
       backBehaviour="history"
     >
@@ -30,6 +38,7 @@ function StackNavigator() {
         options={{
           headerShown: true,
           title: 'Add Entry',
+          // backgroundColor: Colors.light1,
         }}
       />
       <myStack.Screen
@@ -38,6 +47,7 @@ function StackNavigator() {
         options={{
           headerShown: true,
           title: 'Settings',
+          // backgroundColor: Colors.primary4,
         }}
       />
     </myStack.Navigator>

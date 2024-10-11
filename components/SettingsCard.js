@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import CustomButton from './CustomButton';
 
+import Colors from '../utils/colors.js';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const SettingsCard = (props) => {
@@ -11,7 +12,7 @@ const SettingsCard = (props) => {
         <MaterialCommunityIcon
           name={props.iconName}
           size={25}
-          color="#9E2A2B"
+          color={Colors.primary5} //"#9E2A2B"
           style={styles.headerIcon}
         />
         <Text style={styles.headerTitle}> {props.title} </Text>
@@ -21,20 +22,20 @@ const SettingsCard = (props) => {
         <CustomButton
           width={100}
           height={45}
-          color="#9E2A2B"
-          pressedColor="#8C2122"
+          color={Colors.primary4} //"#9E2A2B"
+          pressedColor={Colors.primary5}
           fontSize={18}
-          fontColor="#E09F3E"
+          fontColor={Colors.light1} //"#E09F3E"
           title="Cancel"
           action={props.onCancel}
         />
         <CustomButton
           width={160}
           height={45}
-          color="#335C67"
-          pressedColor="#214751"
+          color={Colors.green4} //"#335C67"
+          pressedColor={Colors.green5} //"#214751"
           fontSize={18}
-          fontColor="#E09F3E"
+          fontColor={Colors.light1} //"#E09F3E"
           title={props.confirmText}
           action={props.onConfirm}
         />
@@ -69,8 +70,9 @@ const styles = StyleSheet.create({
   },
 
   headerTitle: {
-    fontSize: 18,
-    lineHeight: 18,
+    fontSize: 20,
+    fontWeight: '700',
+    lineHeight: 20,
   },
 
   actionContainer: {

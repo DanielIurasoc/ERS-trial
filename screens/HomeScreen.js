@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -7,20 +7,15 @@ import {
   SafeAreaView,
   Image,
   Dimensions,
+  StatusBar,
 } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import XLSX from 'xlsx';
-import * as FileSystem from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useSelector } from 'react-redux';
 
-import * as appDataActions from '../store/actions.js';
+import Colors from '../utils/colors.js';
 import CustomButton from '../components/CustomButton.js';
 import CustomListItem from '../components/CustomListItem.js';
 
 const HomeScreen = (props) => {
-  const [generated, setGenerated] = useState(false);
-
   const today = useSelector((state) => state.appData.today);
   const allEmployeesList = useSelector(
     (state) => state.appData.allEmployeesList
@@ -28,8 +23,6 @@ const HomeScreen = (props) => {
   const clockedEmployeesList = useSelector(
     (state) => state.appData.clockedEmployeesList
   );
-
-  const dispatch = useDispatch();
 
   const onAddHandler = () => {
     props.navigation.navigate('AddEntry');
@@ -39,62 +32,9 @@ const HomeScreen = (props) => {
     props.navigation.navigate('Settings');
   };
 
-  const exportToExcelFile = async () => {
-    try {
-      // read data from Async Storage
-      const clockings = await AsyncStorage.getItem('clockings');
-      const clockingsArray = clockings ? JSON.parse(clockings) : [];
-
-      if (clockingsArray.length === 0) {
-        console.log('No data to export...');
-        return;
-      }
-
-      // create a new workbook and worksheet
-      const workbook = XLSX.utils.book_new();
-      const worksheet = XLSX.utils.json_to_sheet(clockingsArray);
-
-      // append the worksheet to the workbook
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Clockings');
-
-      // write the excel file as a binary string
-      const base64 = XLSX.write(workbook, { type: 'base64' });
-
-      // create a name for the file
-      const fileName = FileSystem.documentDirectory + 'clockings_report.xlsx';
-
-      // save it
-      await FileSystem.writeAsStringAsync(fileName, base64, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
-
-      // Share the file
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(fileName);
-
-        // show a message
-        setGenerated((prev) => !prev);
-      } else {
-        console.log('Sharing is not available on this device');
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const onGenerateHandler = () => {
-    // call the function to export
-    exportToExcelFile();
-
-    // clear the clocked employees list
-    dispatch(appDataActions.clearClockedEmployeesList());
-
-    // clear the clocked entries from Async Storage
-    // dispatch(appDataActions.clearClockingsFromAsyncStorage());
-  };
-
   return (
     <View style={styles.container}>
+      <StatusBar backgroundColor={Colors.primary4} barStyle={'light-content'} />
       <View style={styles.headerContainer}>
         <View style={styles.logoContainer}>
           <Image
@@ -142,40 +82,23 @@ const HomeScreen = (props) => {
           <CustomButton
             width={150}
             height={60}
-            color="#9E2A2B"
-            pressedColor="#8C2122"
+            color={Colors.blue3} //"#9E2A2B"
+            pressedColor={Colors.blue4} //"#8C2122"
             fontSize={28}
-            fontColor="#E09F3E"
+            fontColor={Colors.light1} //"#E09F3E"
             title="Settings"
             action={onSettingsHandler}
           />
           <CustomButton
             width={85}
             height={60}
-            color="#9E2A2B"
-            pressedColor="#8C2122"
+            color={Colors.primary2} //"#9E2A2B"
+            pressedColor={Colors.primary4} //"#8C2122"
             fontSize={40}
-            fontColor="#E09F3E"
+            fontColor={Colors.light1} //"#E09F3E"
             title="+"
             action={onAddHandler}
           />
-        </View>
-        <View style={styles.generateContainer}>
-          <CustomButton
-            width={205}
-            height={60}
-            color="#335C67"
-            pressedColor="#214751"
-            fontSize={20}
-            fontColor="#E09F3E"
-            title="Generate Excel file"
-            action={onGenerateHandler}
-          />
-          {generated && (
-            <Text style={styles.generateText}>
-              File generated at location \Documents\ERS_Reports\ERS_092023.xlsx
-            </Text>
-          )}
         </View>
       </View>
     </View>
@@ -188,7 +111,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 10,
-    backgroundColor: '#fff',
+    backgroundColor: Colors.light1, //'#fff',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -221,6 +144,7 @@ const styles = StyleSheet.create({
   greetingText: {
     fontSize: 26,
     fontWeight: '600',
+    color: Colors.dark,
   },
 
   dateContainer: {
@@ -231,15 +155,17 @@ const styles = StyleSheet.create({
 
   dateText: {
     fontSize: 20,
+    color: Colors.dark,
   },
 
   dateValue: {
     fontSize: 20,
-    color: '#9E2A2B',
+    color: Colors.primary1, //'#9E2A2B',
     fontWeight: '600',
   },
 
   listTitle: {
+    color: Colors.dark,
     textAlign: 'center',
   },
 
@@ -261,18 +187,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-evenly',
     alignItems: 'center',
-  },
-
-  generateContainer: {
-    flex: 0.5,
-    marginTop: 20,
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-  },
-
-  generateText: {
-    fontSize: 14,
-    color: '#2C9E2A',
-    textAlign: 'center',
   },
 });

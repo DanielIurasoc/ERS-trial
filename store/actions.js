@@ -158,8 +158,27 @@ const addClockingEntryToAsyncStorage = async (clocking) => {
     // if data exists, parse it, otherwise init with empty array
     const parsedArray = value ? JSON.parse(value) : [];
 
+    let updatedList;
+
+    // check if there is an object in the array with the same employeeId and date
+    const existingEntry = parsedArray.find(
+      (obj) =>
+        obj.employeeId === clocking.employeeId &&
+        obj.date.split('T')[0] === clocking.date.toISOString().split('T')[0]
+    );
+    if (existingEntry) {
+      // delete the object from the array
+      updatedList = parsedArray.filter(
+        (obj) =>
+          !(
+            obj.employeeId === clocking.employeeId &&
+            obj.date.split('T')[0] === clocking.date.toISOString().split('T')[0]
+          )
+      );
+    }
+
     // concat the new clocking at the end
-    const updatedList = [...parsedArray, clocking];
+    updatedList = [...updatedList, clocking];
 
     AsyncStorage.setItem('clockings', JSON.stringify(updatedList));
   } catch (error) {
