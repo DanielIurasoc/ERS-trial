@@ -110,7 +110,7 @@ const SettingsScreen = (props) => {
       let employeeSheets = [];
       allEmployeesList.forEach((employee) => {
         employeeSheets = employeeSheets.concat(
-          generateEmployeeSheet(clockingsArray, employee.employeeId)
+          generateEmployeeSheet(clockingsArray, employee.id)
         );
       });
 
@@ -174,8 +174,8 @@ const SettingsScreen = (props) => {
       formatTime(item.endTime),
       item.location,
       item.description,
-      item.advancePayment,
-      { f: `=TEXT(E${index + 2}-D${index + 2}, "hh:mm")` }, // formula here
+      parseFloat(item.advancePayment) || 0,
+      { f: `TEXT(E${index + 2}-D${index + 2}, "[h]:mm")` }, // formula here
     ]);
 
     // append the headers and data to the worksheet
@@ -185,33 +185,75 @@ const SettingsScreen = (props) => {
   };
 
   const generateEmployeeSheet = (clockingsArray, employeeId) => {
-    // create the column headers
+    // create the column headers with styling
     const headers = [
-      'Date',
-      'Start time',
-      'End time',
-      'Location',
-      'Description',
-      'Advance Payment',
-      'Worked hours',
+      { v: 'Date', s: { font: { bold: true, sz: 14 } } },
+      { v: 'Start time', s: { font: { bold: true, sz: 14 } } },
+      { v: 'End time', s: { font: { bold: true, sz: 14 } } },
+      { v: 'Location', s: { font: { bold: true, sz: 14 } } },
+      { v: 'Description', s: { font: { bold: true, sz: 14 } } },
+      { v: 'Advance Payment', s: { font: { bold: true, sz: 14 } } },
+      { v: 'Worked hours', s: { font: { bold: true, sz: 14 } } },
     ];
 
     // map data to rows, and include a formula at the end for calculating daily worked hours
     const filteredArray = clockingsArray.filter(
-      (obj) => !obj.employeeId === employeeId
+      (obj) => obj.employeeId === employeeId
     );
+
     const mappedData = filteredArray.map((item, index) => [
       formatDate(item.date),
       formatTime(item.startTime),
       formatTime(item.endTime),
       item.location,
       item.description,
-      item.advancePayment,
-      { f: `=TEXT(E${index + 2}-D${index + 2}, "hh:mm")` }, // formula here
+      parseFloat(item.advancePayment) || 0,
+      { f: `TEXT(C${index + 2}-B${index + 2}, "[h]:mm")` }, // formula here
     ]);
 
-    // append the headers and data to the worksheet
-    const worksheet = XLSX.utils.aoa_to_sheet([headers, ...mappedData]);
+    // find the last row in the sheet
+    const summaryRowIndex = mappedData.length + 2;
+
+    // add the total row at the end with formulas
+    const summaryRow = [
+      'Totals',
+      '',
+      '',
+      '',
+      '',
+      { f: `SUM(F2:F${summaryRowIndex - 1})` },
+      {
+        f: `TEXT(SUMPRODUCT((C2:C${summaryRowIndex - 1}-B2:B${
+          summaryRowIndex - 1
+        })), "[h]:mm")`,
+      },
+    ];
+
+    // append the headers, mapped data and summary to the work sheet
+    const worksheet = XLSX.utils.aoa_to_sheet([
+      headers,
+      ...mappedData,
+      summaryRow,
+    ]);
+
+    // define the column widths
+    worksheet['!cols'] = [
+      { wch: 15 }, // Date column width
+      { wch: 10 }, // Start time column width
+      { wch: 10 }, // End time column width
+      { wch: 20 }, // Location column width
+      { wch: 30 }, // Description column width
+      { wch: 15 }, // Advance payment column width
+      { wch: 15 }, // Worked hours column width
+    ];
+
+    // merge first 5 columns on summary row for better visuals
+    worksheet['!merges'] = [
+      {
+        s: { r: summaryRowIndex - 1, c: 0 },
+        e: { r: summaryRowIndex - 1, c: 4 },
+      },
+    ];
 
     return worksheet;
   };
