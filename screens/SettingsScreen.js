@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Dimensions, StatusBar } from 'react-native';
+import { View, StyleSheet, Dimensions, StatusBar, Alert } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { SelectList } from 'react-native-dropdown-select-list';
 import XLSX from 'xlsx';
@@ -62,7 +62,7 @@ const SettingsScreen = (props) => {
     setReset((prev) => prev + 1);
   };
 
-  const onGenerateHandler = () => {
+  const onGenerateHandler = async () => {
     // call the function to export
     exportToExcelFile();
 
@@ -70,7 +70,16 @@ const SettingsScreen = (props) => {
     dispatch(appDataActions.clearClockedEmployeesList());
 
     // clear the clocked entries from Async Storage
-    // dispatch(appDataActions.clearClockingsFromAsyncStorage());
+    await writeToAsyncStorage('clockings', []);
+    await writeToAsyncStorage('clockedEmployeesList', []);
+  };
+
+  const writeToAsyncStorage = async (identifier, array) => {
+    try {
+      AsyncStorage.setItem(identifier, JSON.stringify(array));
+    } catch (e) {
+      console.log(e.message);
+    }
   };
 
   const formatDate = (dateString) => {
@@ -96,6 +105,7 @@ const SettingsScreen = (props) => {
 
       if (clockingsArray.length === 0) {
         console.log('No data to export...');
+        Alert.alert('Storage empty', 'No data available for export..');
         return;
       }
 
@@ -180,6 +190,19 @@ const SettingsScreen = (props) => {
 
     // append the headers and data to the worksheet
     const worksheet = XLSX.utils.aoa_to_sheet([headers, ...mappedData]);
+
+    // define the column widths
+    worksheet['!cols'] = [
+      { wch: 10 }, // Employeeid column width
+      { wch: 15 }, // Employee name column widt
+      { wch: 10 }, // Date column width
+      { wch: 10 }, // Start time column width
+      { wch: 10 }, // End time column width
+      { wch: 20 }, // Location column width
+      { wch: 30 }, // Description column width
+      { wch: 15 }, // Advance payment column width
+      { wch: 15 }, // Worked hours column width
+    ];
 
     return worksheet;
   };
@@ -288,7 +311,7 @@ const SettingsScreen = (props) => {
         confirmText="Delete employee"
         onConfirm={onConfirmDeleteHandler}
         onCancel={onCancelDeleteHandler}
-        style={{ zIndex: 50 }}
+        // style={{ zIndex: 999 }}
       >
         {/* EMPLOYEE PICKER */}
         <SelectList

@@ -12,6 +12,13 @@ export const setDate = (date) => {
   };
 };
 
+export const updateTodayInAsyncStorage = (date) => {
+  return async () => {
+    await writeToAsyncStorage('today', date);
+    // console.log('done, ' + date + ', ' + JSON.stringify(date));
+  };
+};
+
 export const addEmployee = (employeeName) => {
   // async needed for saving data, dispatch and getState are used for redux
   return async (dispatch, getState) => {
@@ -175,6 +182,8 @@ const addClockingEntryToAsyncStorage = async (clocking) => {
             obj.date.split('T')[0] === clocking.date.toISOString().split('T')[0]
           )
       );
+    } else {
+      updatedList = parsedArray;
     }
 
     // concat the new clocking at the end

@@ -55,6 +55,7 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 999,
   },
 
   header: {

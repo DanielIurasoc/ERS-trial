@@ -15,6 +15,7 @@ import CustomFonts from './utils/fonts.js';
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [fontsLoaded, setFontsLoaded] = useState(false);
+  const [storedDate, setStoredDate] = useState(null);
   const today = useSelector((state) => state.appData.today);
 
   const dispatch = useDispatch();
@@ -26,7 +27,6 @@ export default function App() {
       try {
         //read data from Async for day and clockings
         await readFromAsyncStorage('today');
-        await readFromAsyncStorage('clockedEmployeesList');
 
         // read full list of employees
         await readFromAsyncStorage('allEmployeesList');
@@ -56,25 +56,29 @@ export default function App() {
       // get current date
       const currentDate = new Date();
 
-      // console.log('current: ', currentDate);
-      // console.log('today: ', today);
       // check if the day has changed
-      if (today.getDate() !== currentDate.getDate()) {
-        console.log('entered');
+      if (storedDate.getDate() !== currentDate.getDate()) {
+        // reset today and clocked employees list in async storage
+        await writeToAsyncStorage('today', currentDate);
+        await writeToAsyncStorage('clockedEmployeesList', []);
+
         // reset today and clocked employees list in redux store
         dispatch(appDataActions.setDate(currentDate));
-        dispatch(appDataActions.clearClockedEmployeesList);
-
-        // reset today and clocked employees list in async storage
-        writeToAsyncStorage('today', currentDate);
-        writeToAsyncStorage('clockedEmployeesList', []);
+        dispatch(appDataActions.clearClockedEmployeesList());
+      } else {
+        //read data from Async for clockings
+        await readFromAsyncStorage('clockedEmployeesList');
       }
     }
 
-    if (today instanceof Date && !isNaN(today)) {
+    if (
+      storedDate instanceof Date &&
+      !isNaN(storedDate) &&
+      storedDate !== null
+    ) {
       prepare();
     }
-  }, [today]);
+  }, [storedDate]);
 
   // read data from Async Storage
   const readFromAsyncStorage = async (key) => {
@@ -83,8 +87,8 @@ export default function App() {
       if (value !== null) {
         switch (key) {
           case 'today':
-            const parsedValue = JSON.parse(value);
-            dispatch(appDataActions.setDate(new Date(parsedValue)));
+            setStoredDate(new Date(JSON.parse(value)));
+            //dispatch(appDataActions.setDate(new Date(parsedValue)));
             break;
           case 'allEmployeesList':
             dispatch(appDataActions.setAllEmployeesList(JSON.parse(value)));

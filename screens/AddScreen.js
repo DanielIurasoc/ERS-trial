@@ -59,6 +59,8 @@ const AddScreen = (props) => {
     (state) => state.appData.allEmployeesList
   );
 
+  const today = useSelector((state) => state.appData.today);
+
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -228,6 +230,10 @@ const AddScreen = (props) => {
       };
 
       dispatch(appDataActions.addClockedEmployee(clocking));
+
+      // save the date if not already saved
+      dispatch(appDataActions.updateTodayInAsyncStorage(today));
+
       props.navigation.goBack();
     } else {
       // form is not valid
