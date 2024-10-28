@@ -29,6 +29,10 @@ function ClockingsStack() {
         component={DetailsScreen}
         options={({ route }) => ({
           title: route.params?.title,
+          headerStyle: {
+            backgroundColor: Colors.primary4,
+          },
+          headerTintColor: Colors.light1,
         })}
       />
     </myStack.Navigator>
@@ -48,10 +52,10 @@ function MainBottomTabNavigator() {
           borderLeftColor: Colors.primary5,
           borderRightColor: Colors.primary5,
           borderTopWidth: 3,
-          borderTopLeftRadius: 20,
-          borderTopRightRadius: 20,
-          borderLeftWidth: 0.2,
-          borderRightWidth: 0.2,
+          // borderTopLeftRadius: 20,
+          // borderTopRightRadius: 20,
+          // borderLeftWidth: 0.2,
+          // borderRightWidth: 0.2,
           overflow: 'hidden',
         },
         tabBarHideOnKeyboard: true,

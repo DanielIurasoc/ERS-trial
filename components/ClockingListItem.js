@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: Colors.primary4,
     overflow: 'hidden',
-    marginBottom: 5,
+    marginBottom: 8,
   },
 
   innerContainer: {

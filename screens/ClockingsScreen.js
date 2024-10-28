@@ -26,7 +26,6 @@ const ClockingsScreen = (props) => {
   );
 
   const refreshData = async () => {
-    console.log('refreshing...');
     try {
       setIsRefreshing(true);
 
@@ -40,12 +39,7 @@ const ClockingsScreen = (props) => {
     <View style={styles.container}>
       <StatusBar backgroundColor={Colors.primary4} barStyle={'light-content'} />
       <CustomHeader today={today} />
-      <View
-        style={styles.listOuterContainer}
-        behavior="padding"
-        enabled
-        keyboardVerticalOffset={100}
-      >
+      <View style={styles.listOuterContainer}>
         <ScrollView
           style={styles.filtersContainer}
           contentContainerStyle={styles.filtersContentContainer}
@@ -57,13 +51,14 @@ const ClockingsScreen = (props) => {
           <FilterItem name="Last week" />
           <FilterItem name="Last month" />
           <FilterItem name="Last 3 months" />
+          <FilterItem name="Show all" />
         </ScrollView>
 
         <FlatList
           refreshing={isRefreshing}
           onRefresh={refreshData}
           data={allClockings}
-          style={{ marginTop: 10 }}
+          style={{ paddingTop: 10 }}
           renderItem={(itemData) => (
             <ClockingListItem
               index={itemData.index + 1}
@@ -74,15 +69,40 @@ const ClockingsScreen = (props) => {
               }
               description={`${
                 typeof itemData.item.date === 'string'
-                  ? itemData.item.date.split('T')[0].replaceAll('-', '.')
+                  ? itemData.item.date
+                      .split('T')[0]
+                      .split('-')
+                      .reverse()
+                      .join('.')
                   : itemData.item.date
                       .toISOString()
                       .split('T')[0]
-                      .replaceAll('-', '.')
+                      .split('-')
+                      .reverse()
+                      .join('.')
               }, ${itemData.item.location}`}
               onPress={() => {
                 props.navigation.navigate('Details', {
-                  title: `Details for ${itemData.item.employeeId}`,
+                  title: `${
+                    allEmployeesList.find(
+                      (emp) => emp.id === itemData.item.employeeId
+                    ).name
+                  }, ${
+                    typeof itemData.item.date === 'string'
+                      ? itemData.item.date
+                          .split('T')[0]
+                          .split('-')
+                          .reverse()
+                          .join('.')
+                      : itemData.item.date
+                          .toISOString()
+                          .split('T')[0]
+                          .split('-')
+                          .reverse()
+                          .join('.')
+                  }`,
+                  employeeId: itemData.item.employeeId,
+                  date: itemData.item.date,
                 });
               }}
             />
@@ -127,6 +147,7 @@ const styles = StyleSheet.create({
   },
 
   filtersContainer: {
+    height: 30,
     maxHeight: 30,
     alignSelf: 'center',
     // width: Dimensions.get('window').width,
