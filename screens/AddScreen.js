@@ -234,7 +234,7 @@ const AddScreen = (props) => {
       // save the date if not already saved
       dispatch(appDataActions.updateTodayInAsyncStorage(today));
 
-      props.navigation.goBack();
+      props.navigation.navigate('ListClockingsStack');
     } else {
       // form is not valid
     }

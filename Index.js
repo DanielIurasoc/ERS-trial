@@ -1,14 +1,20 @@
+import './gesture-handler.js';
+import './gesture-handler.native.js';
 import React from 'react';
+import { Text } from 'react-native';
 import { Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
 
-import store from './store/store.js';
+import { store, persistor } from './store/store.js';
 
 import App from './App.js';
 
 const MyApp = () => {
   return (
     <Provider store={store}>
-      <App />
+      <PersistGate loading={<Text> app loading..</Text>} persistor={persistor}>
+        <App />
+      </PersistGate>
     </Provider>
   );
 };

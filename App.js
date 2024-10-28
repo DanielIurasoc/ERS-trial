@@ -1,4 +1,3 @@
-import './gesture-handler';
 import React, { useState, useEffect } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
@@ -25,11 +24,14 @@ export default function App() {
     // define the function
     async function prepare() {
       try {
-        //read data from Async for day and clockings
+        // read data from Async for day and clockings
         await readFromAsyncStorage('today');
 
         // read full list of employees
         await readFromAsyncStorage('allEmployeesList');
+
+        // read all clockings data from async storage
+        await readFromAsyncStorage('allClockings');
 
         await Font.loadAsync(CustomFonts);
 
@@ -95,6 +97,9 @@ export default function App() {
             break;
           case 'clockedEmployeesList':
             dispatch(appDataActions.setClockedEmployeesList(JSON.parse(value)));
+            break;
+          case 'allClockings':
+            dispatch(appDataActions.setAllClockingsList(JSON.parse(value)));
             break;
         }
       }

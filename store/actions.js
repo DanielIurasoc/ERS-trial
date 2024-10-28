@@ -4,6 +4,7 @@ export const SET_DATE = 'SET_DATE';
 export const SET_ALL_EMPLOYEES_LIST = 'SET_ALL_EMPLOYEES_LIST';
 export const SET_CLOCKED_EMPLOYEES_LIST = 'SET_CLOCKED_EMPLOYEES_LIST';
 export const CLEAR_CLOCKED_EMPLOYEES_LIST = 'CLEAR_CLOCKED_EMPLOYEES_LIST';
+export const SET_ALL_CLOCKINGS_LIST = 'SET_ALL_CLOCKINGS_LIST';
 
 export const setDate = (date) => {
   return {
@@ -115,7 +116,14 @@ export const addClockedEmployee = (clocking) => {
     const clockedEmployeesList = getState().appData.clockedEmployeesList;
 
     try {
-      await addClockingEntryToAsyncStorage(clocking);
+      const updatedList = await addClockingEntryToAsyncStorage(clocking);
+
+      // update the redux store
+      dispatch({
+        type: SET_ALL_CLOCKINGS_LIST,
+        payload: updatedList,
+      });
+
       // check if the wanted employee is not already existing in the database
       if (!clockedEmployeesList.some((eid) => eid === clocking.employeeId)) {
         // append the new object to the list
@@ -149,9 +157,16 @@ export const clearClockedEmployeesList = () => {
   };
 };
 
+export const setAllClockingsList = (list) => {
+  return {
+    type: SET_ALL_CLOCKINGS_LIST,
+    payload: list,
+  };
+};
+
 export const clearClockingsFromAsyncStorage = async () => {
   try {
-    await writeToAsyncStorage('clockings', []);
+    await writeToAsyncStorage('allClockings', []);
   } catch (error) {
     console.log(error);
   }
@@ -160,7 +175,7 @@ export const clearClockingsFromAsyncStorage = async () => {
 const addClockingEntryToAsyncStorage = async (clocking) => {
   try {
     // read existing data
-    const value = await AsyncStorage.getItem('clockings');
+    const value = await AsyncStorage.getItem('allClockings');
 
     // if data exists, parse it, otherwise init with empty array
     const parsedArray = value ? JSON.parse(value) : [];
@@ -189,7 +204,14 @@ const addClockingEntryToAsyncStorage = async (clocking) => {
     // concat the new clocking at the end
     updatedList = [...updatedList, clocking];
 
-    AsyncStorage.setItem('clockings', JSON.stringify(updatedList));
+    AsyncStorage.setItem('allClockings', JSON.stringify(updatedList));
+
+    return updatedList;
+
+    // // update the redux store
+    // setAllClockingsList(updatedList);
+
+    // AsyncStorage.setItem('allClockings', JSON.stringify(updatedList));
   } catch (error) {
     console.log(error);
   }

@@ -71,7 +71,7 @@ const SettingsScreen = (props) => {
 
     // clear the clocked entries from Async Storage
     await writeToAsyncStorage('clockings', []);
-    await writeToAsyncStorage('clockedEmployeesList', []);
+    // await writeToAsyncStorage('clockedEmployeesList', []);
   };
 
   const writeToAsyncStorage = async (identifier, array) => {
@@ -100,7 +100,7 @@ const SettingsScreen = (props) => {
   const exportToExcelFile = async () => {
     try {
       // read data from Async Storage
-      const clockings = await AsyncStorage.getItem('clockings');
+      const clockings = await AsyncStorage.getItem('allClockings');
       const clockingsArray = clockings ? JSON.parse(clockings) : [];
 
       if (clockingsArray.length === 0) {
@@ -370,6 +370,21 @@ const SettingsScreen = (props) => {
           </Text>
         )}
       </View>
+      <CustomButton
+        width={205}
+        height={60}
+        color="#335C67"
+        pressedColor="#214751"
+        fontSize={20}
+        fontColor="#E09F3E"
+        title="Clear all clockings"
+        action={async () => {
+          dispatch(appDataActions.setAllClockingsList([]));
+          dispatch(appDataActions.setClockedEmployeesList([]));
+          await writeToAsyncStorage('clockedEmployeesList', []);
+          await writeToAsyncStorage('allClockings', []);
+        }}
+      />
     </View>
   );
 };

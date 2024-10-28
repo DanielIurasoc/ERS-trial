@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "ERS-trial",
+    "name": "ERS-trial-release",
     "slug": "ERS-trial",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -24,9 +24,7 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-      "expo-font"
-    ],
+    "plugins": ["expo-font"],
     "extra": {
       "eas": {
         "projectId": "1f58a508-c8ae-4472-892d-bd4af826bf6b"

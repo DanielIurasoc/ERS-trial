@@ -3,12 +3,14 @@ import {
   SET_ALL_EMPLOYEES_LIST,
   SET_CLOCKED_EMPLOYEES_LIST,
   CLEAR_CLOCKED_EMPLOYEES_LIST,
+  SET_ALL_CLOCKINGS_LIST,
 } from './actions.js';
 
 const initialState = {
   today: new Date(),
   allEmployeesList: [],
   clockedEmployeesList: [],
+  allClockings: [],
 };
 
 export default (state = initialState, action) => {
@@ -32,6 +34,11 @@ export default (state = initialState, action) => {
       return {
         ...state,
         clockedEmployeesList: [],
+      };
+    case SET_ALL_CLOCKINGS_LIST:
+      return {
+        ...state,
+        allClockings: action.payload,
       };
     default:
       return state;
