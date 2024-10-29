@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -19,11 +19,40 @@ import FilterItem from '../components/FilterItem.js';
 
 const ClockingsScreen = (props) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('today');
+  const [listData, setListData] = useState([]);
+
   const today = useSelector((state) => state.appData.today);
   const allClockings = useSelector((state) => state.appData.allClockings);
   const allEmployeesList = useSelector(
     (state) => state.appData.allEmployeesList
   );
+
+  useEffect(() => {
+    switch (activeFilter) {
+      case 'today':
+        setListData(
+          allClockings.filter(
+            (clocking) =>
+              clocking.date.split('T')[0].split('-')[2] ===
+              today.getDate().toString()
+          )
+        );
+        break;
+      case 'lastWeek':
+        // filter
+        break;
+      case 'lastMonth':
+        // filter
+        break;
+      case 'last3Months':
+        // filter
+        break;
+      case 'all':
+      default:
+        setListData(allClockings);
+    }
+  }, [activeFilter]);
 
   const refreshData = async () => {
     try {
@@ -47,17 +76,47 @@ const ClockingsScreen = (props) => {
           showsHorizontalScrollIndicator={false}
           showsVerticalScrollIndicator={false}
         >
-          <FilterItem name="Today" enabled />
-          <FilterItem name="Last week" />
-          <FilterItem name="Last month" />
-          <FilterItem name="Last 3 months" />
-          <FilterItem name="Show all" />
+          <FilterItem
+            name="Today"
+            onPress={() => {
+              setActiveFilter('today');
+            }}
+            enabled={activeFilter === 'today'}
+          />
+          <FilterItem
+            name="Last week"
+            onPress={() => {
+              setActiveFilter('lastWeek');
+            }}
+            enabled={activeFilter === 'lastWeek'}
+          />
+          <FilterItem
+            name="Last month"
+            onPress={() => {
+              setActiveFilter('lastMonth');
+            }}
+            enabled={activeFilter === 'lastMonth'}
+          />
+          <FilterItem
+            name="Last 3 months"
+            onPress={() => {
+              setActiveFilter('last3Months');
+            }}
+            enabled={activeFilter === 'last3Months'}
+          />
+          <FilterItem
+            name="Show all"
+            onPress={() => {
+              setActiveFilter('all');
+            }}
+            enabled={activeFilter === 'all'}
+          />
         </ScrollView>
 
         <FlatList
           refreshing={isRefreshing}
           onRefresh={refreshData}
-          data={allClockings}
+          data={listData}
           style={{ paddingTop: 10 }}
           renderItem={(itemData) => (
             <ClockingListItem
@@ -170,7 +229,7 @@ const styles = StyleSheet.create({
   listInnerContainer: {
     // flex: 1,
     paddingVertical: 10,
-    width: Dimensions.get('window').width * 0.9,
+    width: Dimensions.get('window').width * 0.8,
   },
 });
 

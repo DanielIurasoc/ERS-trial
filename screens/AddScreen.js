@@ -9,6 +9,8 @@ import CustomButton from '../components/CustomButton.js';
 import CustomInputField from '../components/CustomInputField.js';
 import CustomTextInputField from '../components/CustomTextInputField.js';
 import Colors from '../utils/colors.js';
+import CustomToggleButton from '../components/CustomToggleButton.js';
+import { useFocusEffect } from '@react-navigation/native';
 
 const AddScreen = (props) => {
   // ERROR DATA
@@ -16,14 +18,14 @@ const AddScreen = (props) => {
     employeeId: false,
     changedEmployeeId: 0,
     // date: false,
-    startTime: false,
-    changedStartTime: 0,
-    endTime: false,
-    changedEndTime: 0,
+    // startTime: false,
+    // changedStartTime: 0,
+    // endTime: false,
+    // changedEndTime: 0,
     location: false,
     changedLocation: 0,
-    // description: false,
-    // advancePayment: false
+    description: false,
+    advancePayment: false,
   });
 
   // FORM DATA
@@ -31,10 +33,11 @@ const AddScreen = (props) => {
     employeeId: '',
     date: new Date(), //useSelector((state) => state.appData.date),
     dateOpen: false,
-    startTime: ' - ', //useSelector((state) => state.appData.startTime),
-    startOpen: false,
-    endTime: ' - ', //useSelector((state) => state.appData.endTime),
-    endOpen: false,
+    hoursWorked: 8,
+    // startTime: ' - ', //useSelector((state) => state.appData.startTime),
+    // startOpen: false,
+    // endTime: ' - ', //useSelector((state) => state.appData.endTime),
+    // endOpen: false,
     location: '',
     description: '',
     advancePayment: 0,
@@ -45,10 +48,11 @@ const AddScreen = (props) => {
     employeeId,
     date,
     dateOpen,
-    startTime,
-    startOpen,
-    endTime,
-    endOpen,
+    hoursWorked,
+    // startTime,
+    // startOpen,
+    // endTime,
+    // endOpen,
     location,
     description,
     advancePayment,
@@ -63,6 +67,14 @@ const AddScreen = (props) => {
 
   const dispatch = useDispatch();
 
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log('entered');
+      resetForms();
+      trackChange('employeeId');
+    }, [])
+  );
+
   useEffect(() => {
     // check if employee id field validity everytime there is a change, but not on screen load
     if (errorState.changedEmployeeId !== 0 && employeeId === '') {
@@ -74,38 +86,38 @@ const AddScreen = (props) => {
     }
   }, [errorState.changedEmployeeId]);
 
-  useEffect(() => {
-    // check if start time field validity everytime there is a change, but not on screen load
-    if (errorState.changedStartTime !== 0 && startTime === ' - ') {
-      // set error for start time
-      setError('startTime');
-    } else {
-      // clear error for start time
-      clearError('startTime');
-    }
-  }, [errorState.changedStartTime]);
+  // useEffect(() => {
+  //   // check if start time field validity everytime there is a change, but not on screen load
+  //   if (errorState.changedStartTime !== 0 && startTime === ' - ') {
+  //     // set error for start time
+  //     setError('startTime');
+  //   } else {
+  //     // clear error for start time
+  //     clearError('startTime');
+  //   }
+  // }, [errorState.changedStartTime]);
 
-  useEffect(() => {
-    // check if end time field validity everytime there is a change, but not on screen load
-    if (errorState.changedEndTime !== 0 && endTime === ' - ') {
-      // set error for end time
-      setError('endTime');
-    } else {
-      // clear error for end time
-      clearError('endTime');
-    }
-  }, [errorState.changedEndTime]);
+  // useEffect(() => {
+  //   // check if end time field validity everytime there is a change, but not on screen load
+  //   if (errorState.changedEndTime !== 0 && endTime === ' - ') {
+  //     // set error for end time
+  //     setError('endTime');
+  //   } else {
+  //     // clear error for end time
+  //     clearError('endTime');
+  //   }
+  // }, [errorState.changedEndTime]);
 
-  useEffect(() => {
-    // check if locatton field validity everytime there is a change, but not on screen load
-    if (errorState.changedLocation !== 0 && location === '') {
-      // set error for location
-      setError('location');
-    } else {
-      // clear error for location
-      clearError('location');
-    }
-  }, [errorState.changedLocation]);
+  // useEffect(() => {
+  //   // check if locatton field validity everytime there is a change, but not on screen load
+  //   if (errorState.changedLocation !== 0 && location === '') {
+  //     // set error for location
+  //     setError('location');
+  //   } else {
+  //     // clear error for location
+  //     clearError('location');
+  //   }
+  // }, [errorState.changedLocation]);
 
   // method to update a specific field in the form state
   const updateDataField = (identifier, value) => {
@@ -179,25 +191,25 @@ const AddScreen = (props) => {
     // }
 
     // check the validity for the start time field
-    if (startTime === ' - ') {
-      // set error for startTime
-      setError('startTime');
-      valid = false;
-    }
+    // if (startTime === ' - ') {
+    //   // set error for startTime
+    //   setError('startTime');
+    //   valid = false;
+    // }
 
     // check validity for the end time field
-    if (endTime === ' - ') {
-      // set error for endTime
-      setError('endTime');
-      valid = false;
-    }
+    // if (endTime === ' - ') {
+    //   // set error for endTime
+    //   setError('endTime');
+    //   valid = false;
+    // }
 
     // check validity for location field
-    if (location === '') {
-      // set error for location
-      setError('location');
-      valid = false;
-    }
+    // if (location === '') {
+    //   // set error for location
+    //   setError('location');
+    //   valid = false;
+    // }
 
     // description is optional, no need to check validity
     // if (description === '') {
@@ -222,8 +234,9 @@ const AddScreen = (props) => {
       const clocking = {
         employeeId,
         date,
-        startTime,
-        endTime,
+        hoursWorked,
+        // startTime,
+        // endTime,
         location,
         description,
         advancePayment,
@@ -238,6 +251,28 @@ const AddScreen = (props) => {
     } else {
       // form is not valid
     }
+  };
+
+  const resetForms = () => {
+    setFormState({
+      employeeId: '',
+      date: new Date(),
+      dateOpen: false,
+      hoursWorked: 8,
+      location: '',
+      description: '',
+      advancePayment: 0,
+      changed: 0,
+    });
+
+    setErrorState({
+      employeeId: false,
+      changedEmployeeId: 0,
+      location: false,
+      changedLocation: 0,
+      description: false,
+      advancePayment: false,
+    });
   };
 
   return (
@@ -310,8 +345,16 @@ const AddScreen = (props) => {
         }}
       />
 
-      {/* START TIME */}
       <View style={styles.fieldContainer}>
+        <CustomToggleButton
+          onPress={(hours) => {
+            updateDataField('hoursWorked', hours);
+          }}
+        />
+      </View>
+
+      {/* START TIME */}
+      {/* <View style={styles.fieldContainer}>
         <CustomInputField
           label="Start time"
           value={
@@ -348,10 +391,10 @@ const AddScreen = (props) => {
         onCancel={() => {
           updateDataField('startOpen', false);
         }}
-      />
+      /> */}
 
       {/* END TIMEE */}
-      <View style={styles.fieldContainer}>
+      {/* <View style={styles.fieldContainer}>
         <CustomInputField
           label="End time"
           value={
@@ -388,7 +431,7 @@ const AddScreen = (props) => {
         onCancel={() => {
           updateDataField('endOpen', false);
         }}
-      />
+      /> */}
 
       {/* LOCATION INPUT */}
       <View style={styles.fieldContainer}>
@@ -455,7 +498,7 @@ const AddScreen = (props) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingBottom: 40,
+    // paddingBottom: 40,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: Colors.light1,

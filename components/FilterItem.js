@@ -1,13 +1,15 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import Colors from '../utils/colors';
 
 const FilterItem = (props) => {
   const styles = myStyles(props.enabled);
   return (
-    <View style={styles.container}>
+    <Pressable style={styles.container} onPress={props.onPress}>
+      {/* <View style={styles.container}> */}
       <Text> {props.name} </Text>
-    </View>
+      {/* </View> */}
+    </Pressable>
   );
 };
 

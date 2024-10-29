@@ -6,6 +6,7 @@ import {
   TouchableNativeFeedback,
   Platform,
   TouchableOpacity,
+  Dimensions,
 } from 'react-native';
 import Colors from '../utils/colors';
 
@@ -36,7 +37,7 @@ const ClockingListItem = (props) => {
 
 const styles = StyleSheet.create({
   container: {
-    width: '100%',
+    width: Dimensions.get('window').width * 0.9,
     height: 50,
     borderRadius: 20,
     backgroundColor: Colors.primary4,

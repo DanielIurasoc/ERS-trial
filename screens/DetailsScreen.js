@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useSelector } from 'react-redux';
 
@@ -51,11 +51,18 @@ const DetailsScreen = (props) => {
         />
         <DetailsCard
           label="Worked hours"
-          content={new Date(
-            new Date(selectedItem.endTime) - new Date(selectedItem.startTime)
-          )
-            .toISOString()
-            .substr(11, 5)}
+          // content={new Date(
+          //   new Date(selectedItem.endTime) - new Date(selectedItem.startTime)
+          // )
+          //   .toISOString()
+          //   .substr(11, 5)}
+          content={`${String(Math.floor(selectedItem.hoursWorked)).padStart(
+            2,
+            '0'
+          )}:${String(Math.round((selectedItem.hoursWorked % 1) * 60)).padStart(
+            2,
+            '0'
+          )}`}
           borderColor={Colors.green3}
           vertical
         />
