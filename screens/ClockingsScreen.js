@@ -35,18 +35,51 @@ const ClockingsScreen = (props) => {
           allClockings.filter(
             (clocking) =>
               clocking.date.split('T')[0].split('-')[2] ===
-              today.getDate().toString()
+                today.getDate().toString() &&
+              clocking.date.split('T')[0].split('-')[1] ===
+                (today.getMonth() + 1).toString()
           )
         );
         break;
       case 'lastWeek':
-        // filter
+        setListData(
+          allClockings.filter(
+            (clocking) =>
+              Math.abs(new Date(clocking.date) - today) / 1000 / 24 / 60 / 60 <
+              7
+          )
+        );
         break;
       case 'lastMonth':
-        // filter
+        setListData(
+          allClockings.filter(
+            (clocking) =>
+              clocking.date.split('T')[0].split('-')[1] ===
+              (today.getMonth() + 1).toString()
+          )
+        );
         break;
       case 'last3Months':
-        // filter
+        if (today.getMonth() + 1 >= 3) {
+          setListData(
+            allClockings.filter(
+              (clocking) =>
+                Math.abs(
+                  parseInt(clocking.date.split('T')[0].split('-')[1]) -
+                    parseInt((today.getMonth() + 1).toString())
+                ) < 3
+              // ) < 3 ||
+              //   Math.abs(
+              //     parseInt(clocking.date.split('T')[0].split('-')[1]) -
+              //       parseInt(today.getMonth().toString())
+              //   ) < 3 ||
+              //   Math.abs(
+              //     parseInt(clocking.date.split('T')[0].split('-')[1]) -
+              //       parseInt((today.getMonth() - 1).toString())
+              //   ) < 3
+            )
+          );
+        }
         break;
       case 'all':
       default:
@@ -166,7 +199,7 @@ const ClockingsScreen = (props) => {
               }}
             />
           )}
-          keyExtractor={(item) => item.employeeId}
+          keyExtractor={(item) => item.employeeId + item.date}
         />
 
         {/* <ScrollView>

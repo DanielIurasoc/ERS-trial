@@ -69,7 +69,6 @@ const AddScreen = (props) => {
 
   useFocusEffect(
     React.useCallback(() => {
-      console.log('entered');
       resetForms();
       trackChange('employeeId');
     }, [])
@@ -231,6 +230,7 @@ const AddScreen = (props) => {
   const onConfirmHandler = () => {
     if (checkFormValidity()) {
       // form is valid
+      console.log(date.toISOString());
       const clocking = {
         employeeId,
         date,
