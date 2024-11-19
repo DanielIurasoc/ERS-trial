@@ -164,14 +164,6 @@ export const setAllClockingsList = (list) => {
   };
 };
 
-export const clearClockingsFromAsyncStorage = async () => {
-  try {
-    await writeToAsyncStorage('allClockings', []);
-  } catch (error) {
-    console.log(error);
-  }
-};
-
 const addClockingEntryToAsyncStorage = async (clocking) => {
   try {
     // read existing data
@@ -207,11 +199,73 @@ const addClockingEntryToAsyncStorage = async (clocking) => {
     AsyncStorage.setItem('allClockings', JSON.stringify(updatedList));
 
     return updatedList;
+  } catch (error) {
+    console.log(error);
+  }
+};
 
-    // // update the redux store
-    // setAllClockingsList(updatedList);
+export const updateClocking = (clocking) => {
+  return async (dispatch, getState) => {
+    const allClockingsList = getState().appData.allClockings;
 
-    // AsyncStorage.setItem('allClockings', JSON.stringify(updatedList));
+    const updatedList = [...allClockingsList];
+
+    try {
+      // find the index of the existing object
+      const index = allClockingsList.findIndex(
+        (item) =>
+          item.employeeId === clocking.employeeId && item.date === clocking.date
+      );
+
+      if (index !== -1) {
+        // replace it with the new one
+        updatedList[index] = { ...clocking };
+
+        // update async storage
+        writeToAsyncStorage('allClockings', updatedList);
+
+        // update the redux store
+        dispatch({
+          type: SET_ALL_CLOCKINGS_LIST,
+          payload: updatedList,
+        });
+      } else {
+        console.log('Clocking not found!');
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+};
+
+export const deleteClocking = (employeeId, date) => {
+  return async (dispatch, getState) => {
+    const allClockingsList = getState().appData.allClockings;
+
+    try {
+      // find and remove the clocking
+      const updatedList = allClockingsList.filter(
+        (clocking) =>
+          !(clocking.employeeId === employeeId && clocking.date === date)
+      );
+
+      // update async storage
+      writeToAsyncStorage('allClockings', updatedList);
+
+      // update the redux store
+      dispatch({
+        type: SET_ALL_CLOCKINGS_LIST,
+        payload: updatedList,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+};
+
+export const clearClockingsFromAsyncStorage = async () => {
+  try {
+    await writeToAsyncStorage('allClockings', []);
   } catch (error) {
     console.log(error);
   }

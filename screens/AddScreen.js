@@ -230,11 +230,10 @@ const AddScreen = (props) => {
   const onConfirmHandler = () => {
     if (checkFormValidity()) {
       // form is valid
-      console.log(date.toISOString());
       const clocking = {
         employeeId,
-        date,
-        hoursWorked,
+        date: date.toISOString(),
+        hoursWorked: hoursWorked.toString(),
         // startTime,
         // endTime,
         location,
@@ -283,7 +282,6 @@ const AddScreen = (props) => {
       <View style={styles.fieldContainer}>
         {/* EMPLOYEE PICKER */}
         <SelectList
-          // onSelect={() => console.log(employeeId)}
           setSelected={(selected) => {
             updateDataField('employeeId', selected);
           }}

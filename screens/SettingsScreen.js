@@ -65,13 +65,13 @@ const SettingsScreen = (props) => {
   const onGenerateHandler = async () => {
     // call the function to export
     exportToExcelFile();
+  };
 
-    // clear the clocked employees list
-    dispatch(appDataActions.clearClockedEmployeesList());
-
-    // clear the clocked entries from Async Storage
-    await writeToAsyncStorage('clockings', []);
-    // await writeToAsyncStorage('clockedEmployeesList', []);
+  const onClearHandler = async () => {
+    dispatch(appDataActions.setAllClockingsList([]));
+    dispatch(appDataActions.setClockedEmployeesList([]));
+    await writeToAsyncStorage('clockedEmployeesList', []);
+    await writeToAsyncStorage('allClockings', []);
   };
 
   const writeToAsyncStorage = async (identifier, array) => {
@@ -90,10 +90,12 @@ const SettingsScreen = (props) => {
     return `${day}/${month}/${year}`;
   };
 
-  const formatTime = (dateString) => {
-    const date = new Date(dateString);
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
+  const formatTime = (hoursWorked) => {
+    // const date = new Date(dateString);
+    // const hours = date.getHours().toString().padStart(2, '0');
+    // const minutes = date.getMinutes().toString().padStart(2, '0');
+    const hours = String(Math.floor(hoursWorked)).padStart(2, '0');
+    const minutes = String(Math.round((hoursWorked % 1) * 60)).padStart(2, '0');
     return `${hours}:${minutes}`;
   };
 
@@ -111,17 +113,22 @@ const SettingsScreen = (props) => {
 
       // create a new workbook and worksheet
       const workbook = XLSX.utils.book_new();
-      //const worksheet = XLSX.utils.json_to_sheet(clockingsArray);
+      // const workbook = new ExcelJS.Workbook();
+      // const worksheet = XLSX.utils.json_to_sheet(clockingsArray);
 
       // create the base sheet with all clockings
       const allClockings_WS = generateAllClockingsWorksheet(clockingsArray);
+      // workbook.addWorksheet(allClockings_WS);
 
       // create the separate sheets for each employee
       let employeeSheets = [];
       allEmployeesList.forEach((employee) => {
-        employeeSheets = employeeSheets.concat(
-          generateEmployeeSheet(clockingsArray, employee.id)
+        const employeeSheet = generateEmployeeSheet(
+          clockingsArray,
+          employee.id,
+          allEmployeesList.find((emp) => emp.id === employee.id).name
         );
+        workbook.addWorksheet(employeeSheet);
       });
 
       // append the base worksheet to the workbook
@@ -136,11 +143,12 @@ const SettingsScreen = (props) => {
         );
       }
 
-      // write the excel file as a binary string
-      const base64 = XLSX.write(workbook, { type: 'base64' });
-
       // create a name for the file
       const fileName = FileSystem.documentDirectory + 'clockings_report.xlsx';
+
+      // write the excel file as a binary string
+      const base64 = XLSX.write(workbook, { type: 'base64' });
+      // const base64 = await workbook.xlsx.write(fileName, { type: 'base64' });
 
       // save it
       await FileSystem.writeAsStringAsync(fileName, base64, {
@@ -167,56 +175,55 @@ const SettingsScreen = (props) => {
       'Employee id',
       'Employee name',
       'Date',
-      'Start time',
-      'End time',
+      // 'Start time',
+      // 'End time',
       'Location',
       'Description',
-      'Advance Payment',
       'Worked hours',
+      'Advance Payment',
     ];
 
     // map data to rows, and include a formula at the end for calculating daily worked hours
-    const mappedData = clockingsArray.map((item, index) => [
+    const mappedData = clockingsArray.map((item) => [
       item.employeeId,
       allEmployeesList.find((emp) => emp.id === item.employeeId).name,
       formatDate(item.date),
-      formatTime(item.startTime),
-      formatTime(item.endTime),
       item.location,
       item.description,
+      item.hoursWorked / 24,
       parseFloat(item.advancePayment) || 0,
-      { f: `TEXT(E${index + 2}-D${index + 2}, "[h]:mm")` }, // formula here
     ]);
 
     // append the headers and data to the worksheet
     const worksheet = XLSX.utils.aoa_to_sheet([headers, ...mappedData]);
+    // worksheet.data.push(...mappedData);
 
     // define the column widths
     worksheet['!cols'] = [
       { wch: 10 }, // Employeeid column width
       { wch: 15 }, // Employee name column widt
       { wch: 10 }, // Date column width
-      { wch: 10 }, // Start time column width
-      { wch: 10 }, // End time column width
+      // { wch: 10 }, // Start time column width
+      // { wch: 10 }, // End time column width
       { wch: 20 }, // Location column width
       { wch: 30 }, // Description column width
-      { wch: 15 }, // Advance payment column width
       { wch: 15 }, // Worked hours column width
+      { wch: 15 }, // Advance payment column width
     ];
 
     return worksheet;
   };
 
-  const generateEmployeeSheet = (clockingsArray, employeeId) => {
+  const generateEmployeeSheet = (clockingsArray, employeeId, employeeName) => {
     // create the column headers with styling
     const headers = [
       { v: 'Date', s: { font: { bold: true, sz: 14 } } },
-      { v: 'Start time', s: { font: { bold: true, sz: 14 } } },
-      { v: 'End time', s: { font: { bold: true, sz: 14 } } },
+      // { v: 'Start time', s: { font: { bold: true, sz: 14 } } },
+      // { v: 'End time', s: { font: { bold: true, sz: 14 } } },
       { v: 'Location', s: { font: { bold: true, sz: 14 } } },
       { v: 'Description', s: { font: { bold: true, sz: 14 } } },
-      { v: 'Advance Payment', s: { font: { bold: true, sz: 14 } } },
       { v: 'Worked hours', s: { font: { bold: true, sz: 14 } } },
+      { v: 'Advance Payment', s: { font: { bold: true, sz: 14 } } },
     ];
 
     // map data to rows, and include a formula at the end for calculating daily worked hours
@@ -226,13 +233,15 @@ const SettingsScreen = (props) => {
 
     const mappedData = filteredArray.map((item, index) => [
       formatDate(item.date),
-      formatTime(item.startTime),
-      formatTime(item.endTime),
       item.location,
       item.description,
+      item.hoursWorked / 24,
       parseFloat(item.advancePayment) || 0,
-      { f: `TEXT(C${index + 2}-B${index + 2}, "[h]:mm")` }, // formula here
     ]);
+
+    // append the headers and data to the worksheet
+    // const worksheet = XLSX.utils.aoa_to_sheet([headers, ...mappedData]);
+    // worksheet.data.push(...mappedData);
 
     // find the last row in the sheet
     const summaryRowIndex = mappedData.length + 2;
@@ -242,14 +251,8 @@ const SettingsScreen = (props) => {
       'Totals',
       '',
       '',
-      '',
-      '',
-      { f: `SUM(F2:F${summaryRowIndex - 1})` },
-      {
-        f: `TEXT(SUMPRODUCT((C2:C${summaryRowIndex - 1}-B2:B${
-          summaryRowIndex - 1
-        })), "[h]:mm")`,
-      },
+      { f: `SUM(D2:D${summaryRowIndex - 1})` }, // tbd
+      { f: `SUM(E2:E${summaryRowIndex - 1})` }, // tbd
     ];
 
     // append the headers, mapped data and summary to the work sheet
@@ -259,22 +262,24 @@ const SettingsScreen = (props) => {
       summaryRow,
     ]);
 
+    worksheet.data.push(summaryRow);
+
     // define the column widths
     worksheet['!cols'] = [
       { wch: 15 }, // Date column width
-      { wch: 10 }, // Start time column width
-      { wch: 10 }, // End time column width
+      // { wch: 10 }, // Start time column width
+      // { wch: 10 }, // End time column width
       { wch: 20 }, // Location column width
       { wch: 30 }, // Description column width
-      { wch: 15 }, // Advance payment column width
       { wch: 15 }, // Worked hours column width
+      { wch: 15 }, // Advance payment column width
     ];
 
     // merge first 5 columns on summary row for better visuals
     worksheet['!merges'] = [
       {
         s: { r: summaryRowIndex - 1, c: 0 },
-        e: { r: summaryRowIndex - 1, c: 4 },
+        e: { r: summaryRowIndex - 1, c: 2 },
       },
     ];
 
@@ -378,12 +383,7 @@ const SettingsScreen = (props) => {
         fontSize={20}
         fontColor="#E09F3E"
         title="Clear all clockings"
-        action={async () => {
-          dispatch(appDataActions.setAllClockingsList([]));
-          dispatch(appDataActions.setClockedEmployeesList([]));
-          await writeToAsyncStorage('clockedEmployeesList', []);
-          await writeToAsyncStorage('allClockings', []);
-        }}
+        action={onClearHandler}
       />
     </View>
   );
