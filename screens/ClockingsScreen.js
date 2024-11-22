@@ -3,14 +3,15 @@ import {
   View,
   Text,
   StyleSheet,
-  Button,
-  KeyboardAvoidingView,
   ScrollView,
   StatusBar,
   Dimensions,
   FlatList,
 } from 'react-native';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import * as appDataActions from '../store/actions.js';
 
 import CustomHeader from '../components/CustomHeader.js';
 import Colors from '../utils/colors.js';
@@ -27,6 +28,7 @@ const ClockingsScreen = (props) => {
   const allEmployeesList = useSelector(
     (state) => state.appData.allEmployeesList
   );
+  const dispatch = useDispatch();
 
   useEffect(() => {
     switch (activeFilter) {
@@ -68,15 +70,6 @@ const ClockingsScreen = (props) => {
                   parseInt(clocking.date.split('T')[0].split('-')[1]) -
                     parseInt((today.getMonth() + 1).toString())
                 ) < 3
-              // ) < 3 ||
-              //   Math.abs(
-              //     parseInt(clocking.date.split('T')[0].split('-')[1]) -
-              //       parseInt(today.getMonth().toString())
-              //   ) < 3 ||
-              //   Math.abs(
-              //     parseInt(clocking.date.split('T')[0].split('-')[1]) -
-              //       parseInt((today.getMonth() - 1).toString())
-              //   ) < 3
             )
           );
         }
@@ -85,13 +78,41 @@ const ClockingsScreen = (props) => {
       default:
         setListData(allClockings);
     }
-  }, [activeFilter]);
+  }, [activeFilter, allClockings]);
 
   const refreshData = async () => {
     try {
       setIsRefreshing(true);
 
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      try {
+        // read existing data
+        const value = await AsyncStorage.getItem('allClockings');
+
+        // if data exists, parse it, otherwise init with empty array
+        const parsedArray = value ? JSON.parse(value) : [];
+
+        const areEqual =
+          parsedArray.length === allClockings.length &&
+          parsedArray.every(
+            (obj, index) =>
+              obj.employeeId === allClockings[index].employeeId &&
+              obj.date.split('T')[0] ===
+                allClockings[index].date.split('T')[0] &&
+              obj.hoursWorked === allClockings[index].hoursWorked &&
+              obj.description === allClockings[index].description &&
+              obj.location === allClockings[index].location &&
+              obj.advancePayment === allClockings[index].advancePayment
+          );
+
+        if (areEqual) {
+          // add a delay of 1s
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+        } else {
+          dispatch(appDataActions.setAllClockingsList(parsedArray));
+        }
+      } catch (error) {
+        console.log(error);
+      }
     } finally {
       setIsRefreshing(false);
     }
@@ -150,14 +171,14 @@ const ClockingsScreen = (props) => {
           refreshing={isRefreshing}
           onRefresh={refreshData}
           data={listData}
-          style={{ paddingTop: 10 }}
+          style={{ paddingTop: 0 }}
           renderItem={(itemData) => (
             <ClockingListItem
               index={itemData.index + 1}
               name={
                 allEmployeesList.find(
                   (emp) => emp.id === itemData.item.employeeId
-                ).name
+                )?.name
               }
               description={`${
                 typeof itemData.item.date === 'string'
@@ -178,7 +199,7 @@ const ClockingsScreen = (props) => {
                   title: `${
                     allEmployeesList.find(
                       (emp) => emp.id === itemData.item.employeeId
-                    ).name
+                    )?.name
                   }, ${
                     typeof itemData.item.date === 'string'
                       ? itemData.item.date
@@ -201,31 +222,6 @@ const ClockingsScreen = (props) => {
           )}
           keyExtractor={(item) => item.employeeId + item.date}
         />
-
-        {/* <ScrollView>
-          <View style={styles.listInnerContainer}>
-            <ClockingListItem
-              index={1}
-              name="Markus Eddinborough"
-              description="28.10.2024, Main Street 1"
-              onPress={() => {
-                props.navigation.navigate('Details', {
-                  title: 'Details for clocking 1',
-                });
-              }}
-            />
-            <ClockingListItem
-              index={1}
-              name="Alexander McDonald"
-              description="28.10.2024, Imperia Center Road 133"
-              onPress={() => {
-                props.navigation.navigate('Details', {
-                  title: 'Details for clocking 2',
-                });
-              }}
-            />
-          </View>
-        </ScrollView> */}
       </View>
     </View>
   );
@@ -239,8 +235,9 @@ const styles = StyleSheet.create({
   },
 
   filtersContainer: {
-    height: 30,
-    maxHeight: 30,
+    height: 44,
+    maxHeight: 44,
+    paddingBottom: 14,
     alignSelf: 'center',
     // width: Dimensions.get('window').width,
     // paddingHorizontal: Dimensions.get('window').width * 0.05,

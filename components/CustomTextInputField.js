@@ -1,15 +1,14 @@
-import React, { useRef } from 'react';
+import React, { forwardRef, useRef } from 'react';
 import { View, Text, StyleSheet, TextInput, Pressable } from 'react-native';
 
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Colors from '../utils/colors.js';
 
-const CustomTextInputField = ({ label, ...inputProps }) => {
-  const TextInputRef = useRef(null);
+const CustomTextInputField = forwardRef(({ label, ...inputProps }, ref) => {
   return (
     <View style={styles.container}>
       <Pressable
-        onPress={() => TextInputRef.current?.focus()}
+        onPress={() => ref.current?.focus()}
         style={({ pressed }) => [
           styles.input,
           {
@@ -18,7 +17,7 @@ const CustomTextInputField = ({ label, ...inputProps }) => {
         ]}
       >
         {({ pressed }) => (
-          <View>
+          <View pointerEvents="none">
             <Text
               style={[
                 styles.label,
@@ -31,9 +30,10 @@ const CustomTextInputField = ({ label, ...inputProps }) => {
             </Text>
             <View style={styles.insideContainer}>
               <TextInput
-                ref={TextInputRef}
+                ref={ref}
                 placeholder={inputProps.placeholder}
                 value={inputProps.value}
+                onFocus={inputProps.onFocus}
                 onChangeText={inputProps.action}
                 onEndEditing={inputProps.onEndEditing}
                 {...inputProps}
@@ -55,7 +55,7 @@ const CustomTextInputField = ({ label, ...inputProps }) => {
       </Pressable>
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {

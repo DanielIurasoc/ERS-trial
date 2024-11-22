@@ -62,14 +62,14 @@ export default function App() {
       if (storedDate.getDate() !== currentDate.getDate()) {
         // reset today and clocked employees list in async storage
         await writeToAsyncStorage('today', currentDate);
-        await writeToAsyncStorage('clockedEmployeesList', []);
+        // await writeToAsyncStorage('clockedEmployeesList', []);
 
         // reset today and clocked employees list in redux store
         dispatch(appDataActions.setDate(currentDate));
-        dispatch(appDataActions.clearClockedEmployeesList());
+        // dispatch(appDataActions.clearClockedEmployeesList());
       } else {
         //read data from Async for clockings
-        await readFromAsyncStorage('clockedEmployeesList');
+        // await readFromAsyncStorage('clockedEmployeesList');
       }
     }
 
@@ -95,9 +95,9 @@ export default function App() {
           case 'allEmployeesList':
             dispatch(appDataActions.setAllEmployeesList(JSON.parse(value)));
             break;
-          case 'clockedEmployeesList':
-            dispatch(appDataActions.setClockedEmployeesList(JSON.parse(value)));
-            break;
+          // case 'clockedEmployeesList':
+          //   dispatch(appDataActions.setClockedEmployeesList(JSON.parse(value)));
+          //   break;
           case 'allClockings':
             dispatch(appDataActions.setAllClockingsList(JSON.parse(value)));
             break;

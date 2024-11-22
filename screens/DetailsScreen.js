@@ -40,7 +40,7 @@ const DetailsScreen = (props) => {
   useEffect(() => {
     setFormState((prevUserData) => ({
       ...prevUserData,
-      location: selectedItem.location,
+      location: selectedItem?.location,
       hoursWorked: selectedItem.hoursWorked.toString(),
       advancePayment: selectedItem.advancePayment.toString(),
       description: selectedItem.description,
@@ -95,7 +95,7 @@ const DetailsScreen = (props) => {
     }
 
     // check for changes from user input
-    const flag1 = field === 'location' && text !== selectedItem.location;
+    const flag1 = field === 'location' && text !== selectedItem?.location;
     const flag2 =
       field === 'hoursWorked' &&
       validatedText !== selectedItem.hoursWorked.toString();
@@ -116,7 +116,7 @@ const DetailsScreen = (props) => {
 
   const resetFormState = () => {
     setFormState(() => ({
-      location: selectedItem.location,
+      location: selectedItem?.location,
       locationChanged: false,
       hoursWorked: selectedItem.hoursWorked.toString(),
       hoursWorkedChanged: false,
@@ -156,7 +156,7 @@ const DetailsScreen = (props) => {
         <DetailsEditCard
           label="Location: "
           placeholder={
-            selectedItem.location === '' ? 'No location available.' : null
+            selectedItem?.location === '' ? 'No location available.' : null
           }
           value={formState.location}
           action={(text) => {
@@ -177,7 +177,7 @@ const DetailsScreen = (props) => {
           content={
             selectedItem.location === ''
               ? 'No location available.'
-              : selectedItem.location
+              : selectedItem?.location
           }
           borderColor={Colors.maroon}
           vertical={false}
@@ -186,7 +186,7 @@ const DetailsScreen = (props) => {
       <View style={styles.cardsContainer}>
         <DetailsCard
           label="Employee name"
-          content={allEmployeesList.find((emp) => emp.id === employeeId).name}
+          content={allEmployeesList.find((emp) => emp.id === employeeId)?.name}
           borderColor={editEnabled ? Colors.dark : Colors.blue3}
           vertical
         />

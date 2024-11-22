@@ -1,5 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, StatusBar } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+  StatusBar,
+  Alert,
+  Keyboard,
+} from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import DatePicker from 'react-native-date-picker';
 import { SelectList } from 'react-native-dropdown-select-list';
@@ -17,11 +25,6 @@ const AddScreen = (props) => {
   const [errorState, setErrorState] = useState({
     employeeId: false,
     changedEmployeeId: 0,
-    // date: false,
-    // startTime: false,
-    // changedStartTime: 0,
-    // endTime: false,
-    // changedEndTime: 0,
     location: false,
     changedLocation: 0,
     description: false,
@@ -31,13 +34,10 @@ const AddScreen = (props) => {
   // FORM DATA
   const [formState, setFormState] = useState({
     employeeId: '',
-    date: new Date(), //useSelector((state) => state.appData.date),
+    date: new Date(),
     dateOpen: false,
     hoursWorked: 8,
-    // startTime: ' - ', //useSelector((state) => state.appData.startTime),
-    // startOpen: false,
-    // endTime: ' - ', //useSelector((state) => state.appData.endTime),
-    // endOpen: false,
+
     location: '',
     description: '',
     advancePayment: 0,
@@ -49,34 +49,35 @@ const AddScreen = (props) => {
     date,
     dateOpen,
     hoursWorked,
-    // startTime,
-    // startOpen,
-    // endTime,
-    // endOpen,
     location,
     description,
     advancePayment,
-    // changed,
   } = formState;
 
+  const today = useSelector((state) => state.appData.today);
   const allEmployeesList = useSelector(
     (state) => state.appData.allEmployeesList
   );
 
-  const today = useSelector((state) => state.appData.today);
-
   const dispatch = useDispatch();
+
+  const locationInputRef = useRef(null);
+  const descriptionInputRef = useRef(null);
+  const advancePaymentInputRef = useRef(null);
 
   useFocusEffect(
     React.useCallback(() => {
       resetForms();
-      trackChange('employeeId');
+      trackChange('changedEmployeeId');
     }, [])
   );
 
   useEffect(() => {
     // check if employee id field validity everytime there is a change, but not on screen load
-    if (errorState.changedEmployeeId !== 0 && employeeId === '') {
+    if (
+      errorState.changedEmployeeId !== 0 &&
+      (employeeId === 'default' || employeeId === '')
+    ) {
       // set error for employee
       setError('employeeId');
     } else {
@@ -126,7 +127,7 @@ const AddScreen = (props) => {
     }));
 
     // if field is not-functional (not for opening forms) track change
-    if (!identifier.includes('Open')) {
+    if (!identifier.includes('Open') && !identifier.includes('employeeId')) {
       // create change identifier
       const changeIdentifier =
         'changed' + identifier.charAt(0).toUpperCase() + identifier.slice(1);
@@ -140,21 +141,16 @@ const AddScreen = (props) => {
       ...prevUserData,
       [field]: text,
     }));
-
-    // if (!changed) {
-    //   setFormState((prevUserData) => ({
-    //     ...prevUserData,
-    //     changed: true,
-    //   }));
-    // }
   };
 
   // track each change on fields
   const trackChange = (identifier) => {
-    setErrorState((prevState) => ({
-      ...prevState,
-      [identifier]: prevState[identifier] + 1,
-    }));
+    setErrorState((prevState) => {
+      return {
+        ...prevState,
+        [identifier]: prevState[identifier] + 1,
+      };
+    });
   };
 
   // set error for wanted field
@@ -177,7 +173,7 @@ const AddScreen = (props) => {
   const checkFormValidity = () => {
     let valid = true;
     // check validity for the employee field
-    if (employeeId === '') {
+    if (employeeId === 'default' || employeeId === '') {
       // set error for employee
       setError('employeeId');
       valid = false;
@@ -227,26 +223,35 @@ const AddScreen = (props) => {
     return valid;
   };
 
-  const onConfirmHandler = () => {
+  const onConfirmHandler = async () => {
     if (checkFormValidity()) {
+      Keyboard.dismiss();
+
       // form is valid
       const clocking = {
         employeeId,
         date: date.toISOString(),
         hoursWorked: hoursWorked.toString(),
-        // startTime,
-        // endTime,
         location,
         description,
         advancePayment,
       };
 
-      dispatch(appDataActions.addClockedEmployee(clocking));
+      const response = await dispatch(appDataActions.addClocking(clocking));
 
-      // save the date if not already saved
-      dispatch(appDataActions.updateTodayInAsyncStorage(today));
+      if (response) {
+        // save the date if not already saved
+        dispatch(appDataActions.updateTodayInAsyncStorage(today));
 
-      props.navigation.navigate('ListClockingsStack');
+        // props.navigation.navigate('ListClockingsStack');
+        resetForms();
+        // selectListRef.setSelected('default');
+      } else {
+        Alert.alert(
+          'Problem occured!',
+          'A clocking with the same date already exists for this employee. You can edit/delete it from the main screen'
+        );
+      }
     } else {
       // form is not valid
     }
@@ -272,6 +277,7 @@ const AddScreen = (props) => {
       description: false,
       advancePayment: false,
     });
+    trackChange('changedEmployeeId');
   };
 
   return (
@@ -285,14 +291,22 @@ const AddScreen = (props) => {
           setSelected={(selected) => {
             updateDataField('employeeId', selected);
           }}
-          data={allEmployeesList.map((employee) => ({
-            key: employee.id,
-            value: employee.name,
-          }))}
+          data={[
+            {
+              key: 'default',
+              value: 'Select the employee',
+            },
+            ...allEmployeesList.map((employee) => ({
+              key: employee.id,
+              value: employee.name,
+            })),
+          ]}
           save="key"
           boxStyles={styles.boxStyles}
           inputStyles={styles.inputStyles}
-          placeholder="Select the employee"
+          placeholder="Select the employee!"
+          // defaultOption={'default'}
+          key={errorState.changedEmployeeId}
           dropdownStyles={{
             zIndex: 999,
             position: 'absolute',
@@ -434,13 +448,16 @@ const AddScreen = (props) => {
       {/* LOCATION INPUT */}
       <View style={styles.fieldContainer}>
         <CustomTextInputField
+          ref={locationInputRef}
           label="Location"
           value={location}
           placeholder="enter here"
           iconName="map-marker-outline"
           action={(text) => handleInputChange('location', text)}
-          onEndEditing={() => {
+          returnKeyType="next"
+          onSubmitEditing={() => {
             trackChange('changedLocation');
+            descriptionInputRef.current?.focus();
           }}
         />
         {errorState.location && (
@@ -451,11 +468,16 @@ const AddScreen = (props) => {
       {/* DESCRIPTION INPUT */}
       <View style={styles.fieldContainer}>
         <CustomTextInputField
+          ref={descriptionInputRef}
           label="Description"
           value={description}
           placeholder="enter if you want to"
           iconName="comment-text-outline"
+          returnKeyType="next"
           action={(text) => handleInputChange('description', text)}
+          onEndEditing={() => {
+            advancePaymentInputRef.current?.focus();
+          }}
         />
         {/* {errorState.employee && (
           <Text style={styles.errorText}>*please pick an employee!</Text>
@@ -465,11 +487,15 @@ const AddScreen = (props) => {
       {/* ADVANCE PAYMENT INPUT */}
       <View style={styles.fieldContainer}>
         <CustomTextInputField
+          ref={advancePaymentInputRef}
           label="Advance payment"
           value={advancePayment}
           placeholder="leave empty for 0"
           iconName="cash-multiple"
           action={(text) => handleInputChange('advancePayment', text)}
+          onEndEditing={() => {
+            Keyboard.dismiss();
+          }}
           keyboardType="numeric"
         />
         {/* {errorState.employee && (
@@ -481,8 +507,8 @@ const AddScreen = (props) => {
         <CustomButton
           width={120}
           height={45}
-          color={Colors.blue3} //"#335C67"
-          pressedColor={Colors.blue4} //"#214751"
+          color={Colors.blue4} //"#335C67"
+          pressedColor={Colors.blue5} //"#214751"
           fontSize={18}
           fontColor={Colors.light1} //"#E09F3E"
           title="Add Entry"

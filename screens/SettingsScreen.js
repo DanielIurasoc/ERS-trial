@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Dimensions, StatusBar, Alert } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Dimensions,
+  StatusBar,
+  Alert,
+  Text,
+  Keyboard,
+} from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { SelectList } from 'react-native-dropdown-select-list';
 import XLSX from 'xlsx';
@@ -50,6 +58,7 @@ const SettingsScreen = (props) => {
 
   const onCancelAddHandler = () => {
     handleInputChange('');
+    Keyboard.dismiss();
   };
 
   const onConfirmDeleteHandler = () => {
@@ -60,6 +69,7 @@ const SettingsScreen = (props) => {
   const onCancelDeleteHandler = () => {
     setSelectedEmployee(null);
     setReset((prev) => prev + 1);
+    Keyboard.dismiss();
   };
 
   const onGenerateHandler = async () => {
@@ -68,10 +78,27 @@ const SettingsScreen = (props) => {
   };
 
   const onClearHandler = async () => {
-    dispatch(appDataActions.setAllClockingsList([]));
-    dispatch(appDataActions.setClockedEmployeesList([]));
-    await writeToAsyncStorage('clockedEmployeesList', []);
-    await writeToAsyncStorage('allClockings', []);
+    Alert.alert(
+      'Are you sure?',
+      'This action is irreversible, you will delete all your data!',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+          onPress: () => {},
+        },
+        {
+          text: 'Yes, delete it',
+          style: 'destructive',
+          onPress: async () => {
+            dispatch(appDataActions.setAllClockingsList([]));
+            // dispatch(appDataActions.setClockedEmployeesList([]));
+            // await writeToAsyncStorage('clockedEmployeesList', []);
+            await writeToAsyncStorage('allClockings', []);
+          },
+        },
+      ]
+    );
   };
 
   const writeToAsyncStorage = async (identifier, array) => {
@@ -122,13 +149,12 @@ const SettingsScreen = (props) => {
 
       // create the separate sheets for each employee
       let employeeSheets = [];
-      allEmployeesList.forEach((employee) => {
-        const employeeSheet = generateEmployeeSheet(
+      allEmployeesList.forEach((employee, index) => {
+        employeeSheets[index] = generateEmployeeSheet(
           clockingsArray,
           employee.id,
           allEmployeesList.find((emp) => emp.id === employee.id).name
         );
-        workbook.addWorksheet(employeeSheet);
       });
 
       // append the base worksheet to the workbook
@@ -175,8 +201,6 @@ const SettingsScreen = (props) => {
       'Employee id',
       'Employee name',
       'Date',
-      // 'Start time',
-      // 'End time',
       'Location',
       'Description',
       'Worked hours',
@@ -190,7 +214,7 @@ const SettingsScreen = (props) => {
       formatDate(item.date),
       item.location,
       item.description,
-      item.hoursWorked / 24,
+      parseFloat(item.hoursWorked) || 0,
       parseFloat(item.advancePayment) || 0,
     ]);
 
@@ -203,8 +227,6 @@ const SettingsScreen = (props) => {
       { wch: 10 }, // Employeeid column width
       { wch: 15 }, // Employee name column widt
       { wch: 10 }, // Date column width
-      // { wch: 10 }, // Start time column width
-      // { wch: 10 }, // End time column width
       { wch: 20 }, // Location column width
       { wch: 30 }, // Description column width
       { wch: 15 }, // Worked hours column width
@@ -218,8 +240,6 @@ const SettingsScreen = (props) => {
     // create the column headers with styling
     const headers = [
       { v: 'Date', s: { font: { bold: true, sz: 14 } } },
-      // { v: 'Start time', s: { font: { bold: true, sz: 14 } } },
-      // { v: 'End time', s: { font: { bold: true, sz: 14 } } },
       { v: 'Location', s: { font: { bold: true, sz: 14 } } },
       { v: 'Description', s: { font: { bold: true, sz: 14 } } },
       { v: 'Worked hours', s: { font: { bold: true, sz: 14 } } },
@@ -235,7 +255,7 @@ const SettingsScreen = (props) => {
       formatDate(item.date),
       item.location,
       item.description,
-      item.hoursWorked / 24,
+      parseFloat(item.hoursWorked) || 0,
       parseFloat(item.advancePayment) || 0,
     ]);
 
@@ -262,13 +282,11 @@ const SettingsScreen = (props) => {
       summaryRow,
     ]);
 
-    worksheet.data.push(summaryRow);
+    // worksheet.data.push(summaryRow);
 
     // define the column widths
     worksheet['!cols'] = [
       { wch: 15 }, // Date column width
-      // { wch: 10 }, // Start time column width
-      // { wch: 10 }, // End time column width
       { wch: 20 }, // Location column width
       { wch: 30 }, // Description column width
       { wch: 15 }, // Worked hours column width
@@ -289,7 +307,7 @@ const SettingsScreen = (props) => {
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor={Colors.primary4} barStyle={'light-content'} />
-
+      <Text style={styles.title}> Settings </Text>
       {/* ADD NEW EMPLOYEE */}
       <SettingsCard
         title="Add new employee"
@@ -362,10 +380,20 @@ const SettingsScreen = (props) => {
         <CustomButton
           width={205}
           height={60}
-          color="#335C67"
-          pressedColor="#214751"
+          color={Colors.primary4}
+          pressedColor={Colors.primary5}
           fontSize={20}
-          fontColor="#E09F3E"
+          fontColor={Colors.light1}
+          title="Clear all clockings"
+          action={onClearHandler}
+        />
+        <CustomButton
+          width={205}
+          height={60}
+          color={Colors.blue4}
+          pressedColor={Colors.blue5}
+          fontSize={20}
+          fontColor={Colors.light1}
           title="Generate Excel file"
           action={onGenerateHandler}
         />
@@ -375,16 +403,6 @@ const SettingsScreen = (props) => {
           </Text>
         )}
       </View>
-      <CustomButton
-        width={205}
-        height={60}
-        color="#335C67"
-        pressedColor="#214751"
-        fontSize={20}
-        fontColor="#E09F3E"
-        title="Clear all clockings"
-        action={onClearHandler}
-      />
     </View>
   );
 };
@@ -392,10 +410,15 @@ const SettingsScreen = (props) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingBottom: 40,
+    paddingBottom: 10,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: Colors.light1,
+  },
+
+  title: {
+    fontFamily: 'poppins-600',
+    fontSize: 26,
   },
 
   addContainer: {
@@ -411,9 +434,9 @@ const styles = StyleSheet.create({
   },
 
   generateContainer: {
-    flex: 0.5,
-    marginTop: 20,
-    justifyContent: 'flex-start',
+    flex: 0.8,
+    marginTop: 10,
+    justifyContent: 'space-evenly',
     alignItems: 'center',
     zIndex: 1,
   },

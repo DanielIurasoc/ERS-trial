@@ -13,7 +13,7 @@ const rootReducer = combineReducers({
 const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
-  whitelist: ['allEmployeesList', 'clockedEmployeesList'], // list of reducers that need to be persisted
+  whitelist: ['allEmployeesList'], // list of reducers that need to be persisted
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
