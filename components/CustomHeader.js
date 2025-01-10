@@ -19,7 +19,7 @@ const CustomHeader = (props) => {
             : props.today.getDate()}
           .
           {props.today.getMonth() < 9
-            ? '0' + props.today.getMonth().toString() + 1
+            ? '0' + (props.today.getMonth() + 1).toString()
             : props.today.getMonth() + 1}
           .{props.today.getFullYear()}
         </Text>
@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     fontFamily: 'poppins-300',
     color: Colors.dark,
     fontSize: 18,
-    lineHeight: 18,
+    lineHeight: 20,
   },
 
   dateValue: {
@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     color: Colors.primary1,
     fontWeight: '600',
     fontSize: 18,
-    lineHeight: 18,
+    lineHeight: 20,
   },
 });
 

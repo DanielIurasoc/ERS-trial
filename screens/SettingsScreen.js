@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -33,6 +33,8 @@ const SettingsScreen = (props) => {
   const allEmployeesList = useSelector(
     (state) => state.appData.allEmployeesList
   );
+
+  const addNewEmployeeInputRef = useRef(null);
 
   const dispatch = useDispatch();
 
@@ -186,12 +188,25 @@ const SettingsScreen = (props) => {
         await Sharing.shareAsync(fileName);
 
         // show a message
-        setGenerated((prev) => !prev);
+        setGenerated(true);
+
+        // hide the message after 5 seconds
+        setTimeout(() => {
+          setGenerated(false);
+        }, 5000);
       } else {
         console.log('Sharing is not available on this device');
+        Alert.alert(
+          'Something went wrong',
+          'The file cannot be saved/shared, try again later'
+        );
       }
     } catch (error) {
       console.log(error);
+      Alert.alert(
+        'Something went wrong',
+        'The file cannot be saved/shared, try again later'
+      );
     }
   };
 
@@ -318,6 +333,7 @@ const SettingsScreen = (props) => {
       >
         <View style={styles.addContainer}>
           <CustomTextInputField
+            ref={addNewEmployeeInputRef}
             label="Employee name"
             value={newEmployee.name}
             placeholder="enter here"

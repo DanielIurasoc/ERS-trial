@@ -75,7 +75,7 @@ const AddScreen = (props) => {
   useEffect(() => {
     // check if employee id field validity everytime there is a change, but not on screen load
     if (
-      errorState.changedEmployeeId !== 0 &&
+      errorState.changedEmployeeId >= 2 &&
       (employeeId === 'default' || employeeId === '')
     ) {
       // set error for employee

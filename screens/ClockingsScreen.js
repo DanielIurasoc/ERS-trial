@@ -34,13 +34,14 @@ const ClockingsScreen = (props) => {
     switch (activeFilter) {
       case 'today':
         setListData(
-          allClockings.filter(
-            (clocking) =>
+          allClockings.filter((clocking) => {
+            return (
               clocking.date.split('T')[0].split('-')[2] ===
-                today.getDate().toString() &&
+                today.getDate().toString().padStart(2, '0') &&
               clocking.date.split('T')[0].split('-')[1] ===
-                (today.getMonth() + 1).toString()
-          )
+                (today.getMonth() + 1).toString().padStart(2, '0')
+            );
+          })
         );
         break;
       case 'lastWeek':
@@ -57,22 +58,30 @@ const ClockingsScreen = (props) => {
           allClockings.filter(
             (clocking) =>
               clocking.date.split('T')[0].split('-')[1] ===
-              (today.getMonth() + 1).toString()
+              (today.getMonth() + 1).toString().padStart(2, '0')
           )
         );
         break;
       case 'last3Months':
-        if (today.getMonth() + 1 >= 3) {
-          setListData(
-            allClockings.filter(
-              (clocking) =>
-                Math.abs(
-                  parseInt(clocking.date.split('T')[0].split('-')[1]) -
-                    parseInt((today.getMonth() + 1).toString())
-                ) < 3
-            )
-          );
-        }
+        setListData(
+          allClockings.filter((clocking) => {
+            const clockingMonth = parseInt(
+              clocking.date.split('T')[0].split('-')[1]
+            );
+            const todayMonth = parseInt((today.getMonth() + 1).toString());
+
+            if (todayMonth < 3 && clockingMonth > 9) {
+              return Math.abs(todayMonth + 12 - clockingMonth) < 3;
+            }
+
+            return (
+              Math.abs(
+                parseInt(clocking.date.split('T')[0].split('-')[1]) -
+                  parseInt((today.getMonth() + 1).toString())
+              ) < 3
+            );
+          })
+        );
         break;
       case 'all':
       default:
